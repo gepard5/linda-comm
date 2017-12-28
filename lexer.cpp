@@ -16,8 +16,8 @@ Lexer::Lexer() {
 	operator_values = {
 		{ LESS, { "<" } },
 		{ GREATER, { ">" } },
-		{ LESS_THAN, { "<=" } },
-		{ GREATER_THAN, { ">=" } },
+		{ LESS_EQUAL, { "<=" } },
+		{ GREATER_EQUAL, { ">=" } },
 		{ EQUAL, { "=", "==" } }
 	};
 }

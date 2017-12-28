@@ -11,24 +11,23 @@
 
 
 class Lexer {
-	public:
-		Lexer();
+public:
+	Lexer();
+	Token getNextToken(Source& source) const;
 
-		Token getNextToken(Source& source) const;
-		Token::TYPE getTokenType( const std::string& ) const;
-		Token::TYPE getOperatorType( const std::string& ) const;
+private:
+	Token::TYPE getTokenType( const std::string& ) const;
+	Token::TYPE getOperatorType( const std::string& ) const;
+	typedef std::set<std::string> StringSet;
+	using StringSet = std::set<std::string>;
+	using TokenValues = std::set< std::pair<Token::TYPE, StringSet> >;
 
-	private:
-		typedef std::set<std::string> StringSet;
-		using StringSet = std::set<std::string>;
-		using TokenValues = std::set< std::pair<Token::TYPE, StringSet> >;
+	bool isWhitespace(const char c) const
+	{ return whitespace.count(c) == 1; }
 
-		bool isWhitespace(const char c) const
-		{ return whitespace.count(c) == 1; }
-
-		std::set<char> whitespace;
-		TokenValues token_values;
-		TokenValues operator_values;
+	std::set<char> whitespace;
+	TokenValues token_values;
+	TokenValues operator_values;
 };
 
 #endif

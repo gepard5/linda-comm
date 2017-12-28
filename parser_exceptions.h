@@ -4,6 +4,13 @@
 #include <exception>
 #include <stdexcept>
 
+class InvalidTokenException : public std::logic_error {
+	public:
+	InvalidTokenException( const std::string& s ) : 
+		std::logic_error( "Invalid Token found: " + s ) {}
+
+};
+
 class UnrecognisedTokenException : public std::logic_error {
 	public:
 	UnrecognisedTokenException( const std::string& s ) : 
