@@ -18,7 +18,6 @@ public:
 private:
 	Token::TYPE getTokenType( const std::string& ) const;
 	Token::TYPE getOperatorType( const std::string& ) const;
-	typedef std::set<std::string> StringSet;
 	using StringSet = std::set<std::string>;
 	using TokenValues = std::set< std::pair<Token::TYPE, StringSet> >;
 

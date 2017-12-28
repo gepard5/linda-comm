@@ -5,6 +5,7 @@
 #include <regex>
 
 #include "lambda_generator.h"
+#include "parser_exceptions.h"
 
 template<typename Out>
 void split(const std::string &s, char delim, Out result) {
@@ -29,7 +30,7 @@ LambdaGenerator::LambdaGenerator()
 	integer_functions[GREATER_EQUAL] = [](int a, int b) { return a >= b; };
 	integer_functions[EQUAL] = [](int a, int b) { return a == b; };
 	integer_functions[ANY] = [](int a, int b) { return true; };
-	integer_functions[NONE] = [](int a, int b) { return false; };
+	integer_functions[NONE_OPERATOR] = [](int a, int b) { return false; };
 
 	string_functions[LESS] = [](std::string a, std::string b) { return a < b; };
 	string_functions[LESS_EQUAL] = [](std::string a, std::string b) { return a <= b; };
@@ -37,18 +38,18 @@ LambdaGenerator::LambdaGenerator()
 	string_functions[GREATER_EQUAL] = [](std::string a, std::string b) { return a >= b; };
 	string_functions[EQUAL] = [](std::string a, std::string b) { return a == b; };
 	string_functions[ANY] = [](std::string a, std::string b) { return true; };
-	string_functions[NONE] = [](std::string a, std::string b) { return false; };
+	string_functions[NONE_OPERATOR] = [](std::string a, std::string b) { return false; };
 }
 
-void clearAll()
+void LambdaGenerator::clearAll()
 {
 	curr_value = 0;
 	curr_string = "";
-	curr_type = Type::NONE;
-	curr_operator = Operator::NONE;
+	curr_type = Type::NONE_TYPE;
+	curr_operator = Operator::NONE_OPERATOR;
 }
 
-std::function<bool(std::pair<LindaBase::Type, std::string>)> getComparator()
+std::function<bool(std::pair<LindaBase::Type, std::string>)> LambdaGenerator::getComparator()
 {
 	if( !isReady() )
 		throw UnreadyComparator();

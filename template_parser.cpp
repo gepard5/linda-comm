@@ -1,25 +1,25 @@
 #include <stdlib.h>
 
-#include "parser.h"
+#include "template_parser.h"
 
 TemplateParser::TemplateParser() {
 	expected_tokens[BEFORE_MESSAGE] = { Token::OBJECT_START };
 	expected_tokens[BEFORE_VALUE] = { Token::ZERO, Token::NUMBER, Token::STRING, Token::MATCHALL_SIGN,
    		Token::LESS, Token::LESS_EQUAL, Token::GREATER, Token::GREATER_EQUAL, Token::EQUAL	};
-	expected_token[AFTER_OPERATOR] = { Token::ZERO, Token::NUMBER, Token::STRING };
+	expected_tokens[AFTER_OPERATOR] = { Token::ZERO, Token::NUMBER, Token::STRING };
 	expected_tokens[AFTER_VALUE] = { Token::VALUE_SEPARATOR, Token::OBJECT_END };
 	expected_tokens[AFTER_MESSAGE] = { Token::END_OF_FILE };
 
-	semantic_actions[Token::OBJECT_START] = std::bind( &Parser::onObjectStart, this );
-	semantic_actions[Token::EQUAL] = std::bind( &Parser::onEqual, this );
-	semantic_actions[Token::LESS] = std::bind( &Parser::onLess, this );
-	semantic_actions[Token::LESS_EQUAL] = std::bind( &Parser::onLessEqual, this );
-	semantic_actions[Token::GREATER] = std::bind( &Parser::onGreater, this );
-	semantic_actions[Token::GREATER_EQUAL] = std::bind( &Parser::GreaterEqual, this );
-	semantic_actions[Token::MATCHALL_SIGN] = std::bind( &Parser::onAny, this );
-	semantic_actions[Token::ZERO] = std::bind( &Parser::onNumber, this );
-	semantic_actions[Token::NUMBER] = std::bind( &Parser::onNumber, this );
-	semantic_actions[Token::STRING] = std::bind( &Parser::onString, this );
+	semantic_actions[Token::OBJECT_START] = std::bind( &TemplateParser::onObjectStart, this );
+	semantic_actions[Token::EQUAL] = std::bind( &TemplateParser::onEqual, this );
+	semantic_actions[Token::LESS] = std::bind( &TemplateParser::onLess, this );
+	semantic_actions[Token::LESS_EQUAL] = std::bind( &TemplateParser::onLessEqual, this );
+	semantic_actions[Token::GREATER] = std::bind( &TemplateParser::onGreater, this );
+	semantic_actions[Token::GREATER_EQUAL] = std::bind( &TemplateParser::onGreaterEqual, this );
+	semantic_actions[Token::MATCHALL_SIGN] = std::bind( &TemplateParser::onAny, this );
+	semantic_actions[Token::ZERO] = std::bind( &TemplateParser::onNumber, this );
+	semantic_actions[Token::NUMBER] = std::bind( &TemplateParser::onNumber, this );
+	semantic_actions[Token::STRING] = std::bind( &TemplateParser::onString, this );
 }
 
 void TemplateParser::printInfo() const
@@ -29,13 +29,11 @@ void TemplateParser::printInfo() const
 
 bool TemplateParser::isTokenTypeExpected(const Token::TYPE& type)
 {
-	if( type == Token::COMMENT ) return true;
+	if( type == Token::ANY ) return true;
 	return expected_tokens[state].count( type ) != 0;
 }
 
-void TemplateParser::parseSource( Source& source, Lexer& lexer) {
-	file = source.getSourceName();
-	std::cout<<file<<std::endl;
+void TemplateParser::parseSource( Source& source, const Lexer& lexer) {
 	state = STATE::BEFORE_MESSAGE;
 	token = lexer.getNextToken(source);
 	while( token.getType() != Token::END_OF_FILE ) {

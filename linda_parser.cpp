@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "parser.h"
+#include "linda_parser.h"
 
 LindaParser::LindaParser() {
 	expected_tokens[BEFORE_MESSAGE] = { Token::OBJECT_START };
@@ -8,10 +8,10 @@ LindaParser::LindaParser() {
 	expected_tokens[AFTER_VALUE] = { Token::VALUE_SEPARATOR, Token::OBJECT_END };
 	expected_tokens[AFTER_MESSAGE] = { Token::END_OF_FILE };
 
-	semantic_actions[Token::OBJECT_START] = std::bind( &Parser::onObjectStart, this );
-	semantic_actions[Token::ZERO] = std::bind( &Parser::onNumber, this );
-	semantic_actions[Token::NUMBER] = std::bind( &Parser::onNumber, this );
-	semantic_actions[Token::STRING] = std::bind( &Parser::onString, this );
+	semantic_actions[Token::OBJECT_START] = std::bind( &LindaParser::onObjectStart, this );
+	semantic_actions[Token::ZERO] = std::bind( &LindaParser::onNumber, this );
+	semantic_actions[Token::NUMBER] = std::bind( &LindaParser::onNumber, this );
+	semantic_actions[Token::STRING] = std::bind( &LindaParser::onString, this );
 }
 
 void LindaParser::printInfo() const
@@ -21,13 +21,11 @@ void LindaParser::printInfo() const
 
 bool LindaParser::isTokenTypeExpected(const Token::TYPE& type)
 {
-	if( type == Token::COMMENT ) return true;
+	if( type == Token::ANY ) return true;
 	return expected_tokens[state].count( type ) != 0;
 }
 
-void LindaParser::parseSource( Source& source, Lexer& lexer) {
-	file = source.getSourceName();
-	std::cout<<file<<std::endl;
+void LindaParser::parseSource( Source& source, const Lexer& lexer) {
 	state = STATE::BEFORE_MESSAGE;
 	token = lexer.getNextToken(source);
 	while( token.getType() != Token::END_OF_FILE ) {

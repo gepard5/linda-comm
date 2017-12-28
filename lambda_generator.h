@@ -1,12 +1,14 @@
 #ifndef __LAMBDA_GENERATOR__
 #define __LAMBDA_GENERATOR__
 
+#include "linda_base.h"
+
 class LambdaGenerator {
 public:
 	enum Type {
 		INTEGER,
 		STRING,
-		NONE
+		NONE_TYPE
 	};
 	enum Operator {
 		LESS,
@@ -15,8 +17,7 @@ public:
 		GREATER_EQUAL,
 		EQUAL,
 		ANY,
-		STRING,
-		NONE
+		NONE_OPERATOR
 	};
 
 	LambdaGenerator();
@@ -36,7 +37,7 @@ public:
 	std::function<bool(std::pair<LindaBase::Type, std::string>)> getComparator();
 
 	bool isReady() const
-	{ return curr_type != NONE && curr_operator != NONE; }
+	{ return curr_type != NONE_TYPE && curr_operator != NONE_OPERATOR; }
 
 	void clearAll();
 
@@ -44,7 +45,7 @@ private:
 	std::string curr_string;
 	int curr_value;
 	Type curr_type;
-	std::map<Operator, std::function<bool(int, int)> > operator_functions;
+	std::map<Operator, std::function<bool(int, int)> > integer_functions;
 	std::map<Operator, std::function<bool(std::string, std::string)> > string_functions;
 	Operator curr_operator;
 };

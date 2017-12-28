@@ -1,16 +1,20 @@
 #ifndef __LINDA_TEMPLATE__
 #define __LINDA_TEMPLATE__
 
+#include "linda_base.h"
+#include "linda_template.h"
+#include <list>
+#include <functional>
+
 class LindaTemplate : public LindaBase {
 public:
+	LindaTemplate() {}
 	LindaTemplate(const std::list<std::function<bool(LTPair)>>& f) :
 		value_checkers(f) {}
-	std::string toString() const override;
+	std::string toString() const override
+	{ return ""; }
 
 	bool isMatching(std::list<LTPair>) const;
-
-	bool isMatching(const LindaValue& lv) const
-	{ return isMatching(lv.getValues()); }
 
 	void addValue( std::function<bool(LTPair)> f )
 	{ value_checkers.push_back(f); }

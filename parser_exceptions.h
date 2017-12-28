@@ -11,6 +11,12 @@ class InvalidTokenException : public std::logic_error {
 
 };
 
+class UnreadyComparator : public std::logic_error {
+	public:
+		UnreadyComparator() :
+			std::logic_error( "" ) {}
+};
+
 class UnrecognisedTokenException : public std::logic_error {
 	public:
 	UnrecognisedTokenException( const std::string& s ) : 

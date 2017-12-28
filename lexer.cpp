@@ -1,24 +1,25 @@
 #include "lexer.h"
+#include "parser_exceptions.h"
 
 
 Lexer::Lexer() {
 	whitespace = { ' ', '\t', '\n' };
 	token_values = {
-		{ OBJECT_START, { "(" } },
-		{ OBJECT_END, { ")" } },
-		{ VALUE_SEPARATOR, { "," } },
-		{ OPERATOR, { "=", "<", ">" } },
-		{ STRING_EDGE, { "\"" } },
-		{ ZERO, { "0" } },
-		{ NUMBER, { "1", "2", "3", "4", "5", "6", "7", "8", "9" } },
-		{ MATCHALL_SIGN, { "*" } }
+		{ Token::OBJECT_START, { "(" } },
+		{ Token::OBJECT_END, { ")" } },
+		{ Token::VALUE_SEPARATOR, { "," } },
+		{ Token::OPERATOR, { "=", "<", ">" } },
+		{ Token::STRING_EDGE, { "\"" } },
+		{ Token::ZERO, { "0" } },
+		{ Token::NUMBER, { "1", "2", "3", "4", "5", "6", "7", "8", "9" } },
+		{ Token::MATCHALL_SIGN, { "*" } }
 	};
 	operator_values = {
-		{ LESS, { "<" } },
-		{ GREATER, { ">" } },
-		{ LESS_EQUAL, { "<=" } },
-		{ GREATER_EQUAL, { ">=" } },
-		{ EQUAL, { "=", "==" } }
+		{ Token::LESS, { "<" } },
+		{ Token::GREATER, { ">" } },
+		{ Token::LESS_EQUAL, { "<=" } },
+		{ Token::GREATER_EQUAL, { ">=" } },
+		{ Token::EQUAL, { "=", "==" } }
 	};
 }
 
@@ -33,8 +34,8 @@ Token Lexer::getNextToken(Source& source) const {
 	auto type = getTokenType( curr_token );
 
 	if( type == Token::OPERATOR ) {
-		if( source.peekChar() == "=" ) {
-			curr_token.push_back();
+		if( source.peekChar() == '=' ) {
+			curr_token.push_back( source.getChar() );
 		}
 		type = getOperatorType( curr_token );
 	}
@@ -45,10 +46,10 @@ Token Lexer::getNextToken(Source& source) const {
 		type = Token::STRING;
 	}
 	else if( type == Token::NUMBER ) {
-		auto next_type = getTokenType( std::string( source.peekChar() ) );
+		auto next_type = getTokenType( std::string( 1, source.peekChar() ) );
 		while( next_type == Token::NUMBER || Token::ZERO ) {
-			curr_token.push_back( souce.getChar() );
-			next_type = getTokenType( std::string( source.peekChar() ) );
+			curr_token.push_back( source.getChar() );
+			next_type = getTokenType( std::string( 1, source.peekChar() ) );
 		}
 	}
 

@@ -1,10 +1,12 @@
 #include "token.h"
+#include "parser_exceptions.h"
+
 #include <stdlib.h>
 
 std::map<Token::TYPE, std::string> Token::token_types = {
 	{ OBJECT_START, "object_start" },
 	{ OBJECT_END, "object_end" },
-	{ VALUE_SEPARATOR, "value_separator },
+	{ VALUE_SEPARATOR, "value_separator" },
 	{ OPERATOR, "operator" },
 	{ LESS, "less" },
 	{ GREATER, "greater" },

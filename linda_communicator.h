@@ -1,3 +1,12 @@
+
+#include <list>
+#include <string>
+#include <functional>
+
+#include "linda_base.h"
+#include "linda_value.h"
+#include "linda_template.h"
+
 class LindaCommunicator {
 public:
 	LindaValue createValue(const std::string&);

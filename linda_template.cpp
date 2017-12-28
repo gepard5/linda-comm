@@ -8,7 +8,7 @@ bool LindaTemplate::isMatching(std::list<LTPair> lv) const
 		return false;
 
 	bool result = true;
-	auto& value = lv.begin();
+	auto value = lv.begin();
 	for( auto& checker : value_checkers )
 	{
 		result &= checker( *value );
