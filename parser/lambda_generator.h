@@ -5,7 +5,7 @@
 #include <functional>
 #include <map>
 
-#include "linda_base.h"
+#include "../linda_base.h"
 
 class LambdaGenerator {
 public:

@@ -1,5 +1,5 @@
 #include "linda_communicator.h"
-#include "stringSource.h"
+#include "parser/stringSource.h"
 
 LindaValue LindaCommunicator::createValue(const std::string& s)
 {

@@ -1,48 +1,34 @@
-#include <utility>
 #include <functional>
 
+#include "../linda_value.h"
 #include "parser.h"
-#include "lambda_generator.h"
-#include "lexer.h"
-#include "token.h"
-#include "linda_template.h"
 
-class TemplateParser : public Parser {
+class ValueParser : public Parser {
 public:
-	TemplateParser();
+	ValueParser();
 	void parseSource( Source& source, Lexer& lexer ) override;
 	void showExpectedTokens() override;
 
-	LindaTemplate getLindaTemplate() const
+	LindaValue getLindaValue() const
 	{ return lv; }
 
 private:
 	enum STATE {
 		BEFORE_MESSAGE,
 		BEFORE_VALUE,
-		AFTER_OPERATOR,
 		AFTER_VALUE,
 		AFTER_MESSAGE
 	};
 
 	void onObjectStart();
-	void onEqual();
-	void onLess();
-	void onLessEqual();
-	void onGreater();
-	void onGreaterEqual();
-	void onAny();
 	void onNumber();
 	void onString();
 	void onValueSeparator();
 	void onObjectEnd();
 
-	void addReadyComparator();
-
 	bool isTokenTypeExpected(const Token::TYPE& type);
 
-	LindaTemplate lv;
-	LambdaGenerator lambda_generator;
+	LindaValue lv;
 
 	STATE state;
 	Token token;

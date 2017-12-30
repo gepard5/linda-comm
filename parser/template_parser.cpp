@@ -1,5 +1,3 @@
-#include <stdlib.h>
-
 #include "template_parser.h"
 
 TemplateParser::TemplateParser() {

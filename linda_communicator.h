@@ -5,9 +5,9 @@
 
 #include "linda_value.h"
 #include "linda_template.h"
-#include "value_parser.h"
-#include "template_parser.h"
-#include "lexer.h"
+#include "parser/value_parser.h"
+#include "parser/template_parser.h"
+#include "parser/lexer.h"
 
 class LindaCommunicator {
 public:
