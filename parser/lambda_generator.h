@@ -46,9 +46,16 @@ public:
 	void clearAll();
 
 private:
+	using CompareFunction = std::function<bool(std::pair<LindaBase::Type, std::string>)>;
+
+	CompareFunction getNonEqualStringComparator();
+	CompareFunction getEqualStringComparator();
+	CompareFunction getIntegerComparator();
+
 	std::string curr_string;
 	int curr_value;
 	Type curr_type;
+
 	std::map<Operator, std::function<bool(int, int)> > integer_functions;
 	std::map<Operator, std::function<bool(std::string, std::string)> > string_functions;
 	Operator curr_operator;

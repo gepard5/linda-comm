@@ -59,53 +59,68 @@ std::function<bool(std::pair<LindaBase::Type, std::string>)> LambdaGenerator::ge
 
 	if( curr_type == Type::STRING ) {
 		if( curr_operator == Operator::EQUAL ) {
-			std::vector<std::string> splitted = str_utils::split(curr_string, '*');
-
-			return [splitted](std::pair<LindaBase::Type, std::string> p) {
-				if( p.first != LindaBase::Type::STRING ) return false;
-				unsigned found = 0;
-				for( const auto& s : splitted )
-				{
-					if( s.empty() ) continue;
-					found = p.second.find(s, found);
-					if( found == std::string::npos ) {
-						return false;
-					}
-					found += s.size();
-				}
-				bool ends_with_star = p.second.back() == '*';
-				return found == p.second.size() || ends_with_star;
-			};
+			return getEqualStringComparator();
 		}
 
-		if( curr_string.find('*') != std::string::npos )
-			throw InvalidTokenException(curr_string);
-
-		auto compare_function = string_functions[curr_operator];
-
-		return [curr_str = this->curr_string, compare_function](std::pair<LindaBase::Type, std::string> p) {
-			if( p.first != LindaBase::Type::STRING ) return false;
-
-			return compare_function(p.second, curr_str);
-		};
+		return getNonEqualStringComparator();
 	}
 	else if( curr_type == Type::INTEGER ) {
-		auto compare_function = integer_functions[curr_operator];
-
-		return [curr_val = this->curr_value, compare_function](std::pair<LindaBase::Type, std::string> p) {
-			if( p.first != LindaBase::Type::INTEGER ) return false;
-			int parsed_value;
-			try{
-				parsed_value = std::stoi( p.second );
-			}
-			catch(std::invalid_argument& e)
-			{ return false; }
-
-			return compare_function(parsed_value, curr_val);
-		};
+		return getIntegerComparator();
 	}
 
 	return [](std::pair<LindaBase::Type, std::string> p) {
 		return false;
+	};
+}
+
+LambdaGenerator::CompareFunction LambdaGenerator::getNonEqualStringComparator()
+{
+	if( curr_string.find('*') != std::string::npos )
+		throw InvalidTokenException(curr_string);
+
+	auto compare_function = string_functions[curr_operator];
+
+	return [curr_str = this->curr_string, compare_function](std::pair<LindaBase::Type, std::string> p) {
+		if( p.first != LindaBase::Type::STRING ) return false;
+
+		return compare_function(p.second, curr_str);
+	};
+}
+
+LambdaGenerator::CompareFunction LambdaGenerator::getEqualStringComparator()
+{
+	std::vector<std::string> splitted = str_utils::split(curr_string, '*');
+
+	return [splitted](std::pair<LindaBase::Type, std::string> p) {
+		if( p.first != LindaBase::Type::STRING ) return false;
+		unsigned found = 0;
+		for( const auto& s : splitted )
+		{
+			if( s.empty() ) continue;
+			found = p.second.find(s, found);
+			if( found == std::string::npos ) {
+				return false;
+			}
+			found += s.size();
+		}
+		bool ends_with_star = p.second.back() == '*';
+		return found == p.second.size() || ends_with_star;
+	};
+}
+
+LambdaGenerator::CompareFunction LambdaGenerator::getIntegerComparator()
+{
+	auto compare_function = integer_functions[curr_operator];
+
+	return [curr_val = this->curr_value, compare_function](std::pair<LindaBase::Type, std::string> p) {
+		if( p.first != LindaBase::Type::INTEGER ) return false;
+		int parsed_value;
+		try{
+			parsed_value = std::stoi( p.second );
+		}
+		catch(std::invalid_argument& e)
+		{ return false; }
+
+		return compare_function(parsed_value, curr_val);
 	};
 }
