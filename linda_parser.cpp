@@ -22,7 +22,7 @@ bool LindaParser::isTokenTypeExpected(const Token::TYPE& type)
 	return expected_tokens[state].count( type ) != 0;
 }
 
-void LindaParser::parseSource( Source& source, const Lexer& lexer) {
+void LindaParser::parseSource( Source& source, Lexer& lexer) {
 	state = STATE::BEFORE_MESSAGE;
 	token = lexer.getNextToken(source);
 	while( token.getType() != Token::END_OF_FILE ) {

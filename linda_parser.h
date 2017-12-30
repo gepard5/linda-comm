@@ -7,7 +7,7 @@
 class LindaParser : public Parser {
 public:
 	LindaParser();
-	void parseSource( Source& source, const Lexer& lexer ) override;
+	void parseSource( Source& source, Lexer& lexer ) override;
 	void showExpectedTokens() override;
 
 	LindaValue getLindaValue() const

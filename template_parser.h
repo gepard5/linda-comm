@@ -10,7 +10,7 @@
 class TemplateParser : public Parser {
 public:
 	TemplateParser();
-	void parseSource( Source& source, const Lexer& lexer ) override;
+	void parseSource( Source& source, Lexer& lexer ) override;
 	void showExpectedTokens() override;
 
 	LindaTemplate getLindaTemplate() const

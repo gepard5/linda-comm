@@ -12,7 +12,6 @@
 
 class Lexer {
 public:
-	Lexer();
 	Token getNextToken(Source& source);
 
 private:
@@ -33,7 +32,7 @@ private:
 	static const std::set<char> whitespace;
 	static const std::set< std::pair<Token::TYPE, std::set<char>> > token_values;
 	static const std::set< std::pair<Token::TYPE, StringSet> > operator_values;
-	const char STRING_END {'\"'};
+	static const char STRING_END;
 };
 
 #endif

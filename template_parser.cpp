@@ -30,7 +30,7 @@ bool TemplateParser::isTokenTypeExpected(const Token::TYPE& type)
 	return expected_tokens[state].count( type ) != 0;
 }
 
-void TemplateParser::parseSource( Source& source, const Lexer& lexer) {
+void TemplateParser::parseSource( Source& source, Lexer& lexer) {
 	state = STATE::BEFORE_MESSAGE;
 	token = lexer.getNextToken(source);
 	while( token.getType() != Token::END_OF_FILE ) {

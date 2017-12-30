@@ -2,28 +2,28 @@
 #include "parser_exceptions.h"
 
 
-Lexer::Lexer() {
-	whitespace = { ' ', '\t', '\n' };
-	token_values = {
-		{ Token::OBJECT_START, { '(' } },
-		{ Token::OBJECT_END, { ')' } },
-		{ Token::VALUE_SEPARATOR, { ',' } },
-		{ Token::OPERATOR, { '=', '<', '>' } },
-		{ Token::STRING_EDGE, { STRING_END } },
-		{ Token::ZERO, { '0' } },
-		{ Token::NUMBER, { '1', '2', '3', '4', '5', '6', '7', '8', '9' } },
-		{ Token::MINUS, {'-'} },
-		{ Token::MATCHALL_SIGN, { '*' } },
-		{ Token::END_OF_FILE, { EOF } }
-	};
-	operator_values = {
-		{ Token::LESS, { "<" } },
-		{ Token::GREATER, { ">" } },
-		{ Token::LESS_EQUAL, { "<=" } },
-		{ Token::GREATER_EQUAL, { ">=" } },
-		{ Token::EQUAL, { "=", "==" } }
-	};
-}
+const char Lexer::STRING_END = '\"';
+const std::set< std::pair<Token::TYPE, std::set<char>> > Lexer::token_values = {
+	{ Token::OBJECT_START, { '(' } },
+	{ Token::OBJECT_END, { ')' } },
+	{ Token::VALUE_SEPARATOR, { ',' } },
+	{ Token::OPERATOR, { '=', '<', '>' } },
+	{ Token::STRING_EDGE, { STRING_END } },
+	{ Token::ZERO, { '0' } },
+	{ Token::NUMBER, { '1', '2', '3', '4', '5', '6', '7', '8', '9' } },
+	{ Token::MINUS, {'-'} },
+	{ Token::MATCHALL_SIGN, { '*' } },
+	{ Token::END_OF_FILE, { EOF } }
+};
+const std::set<char> Lexer::whitespace = { ' ', '\t', '\n' };
+
+const std::set< std::pair<Token::TYPE, Lexer::StringSet> > Lexer::operator_values = {
+	{ Token::LESS, { "<" } },
+	{ Token::GREATER, { ">" } },
+	{ Token::LESS_EQUAL, { "<=" } },
+	{ Token::GREATER_EQUAL, { ">=" } },
+	{ Token::EQUAL, { "=", "==" } }
+};
 
 Token Lexer::getNextToken(Source& source) {
 	curr_token.clear();
@@ -36,6 +36,7 @@ Token Lexer::getNextToken(Source& source) {
 	type = getTokenType( curr_token[0] );
 
 	if( type == Token::OPERATOR ) {
+		getOperator(source);
 	}
 	else if( type == Token::STRING_EDGE ) {
 		getString(source);
@@ -80,6 +81,7 @@ void Lexer::getSignedNumber( Source& source )
 		throw InvalidTokenException( curr_token );
 
 	getNumber(source);
+	type = Token::NUMBER;
 }
 
 void Lexer::getNumber( Source& source )

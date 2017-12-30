@@ -7,7 +7,7 @@
 
 class Parser {
 public:
-	virtual void parseSource( Source& source, const Lexer& lexer ) = 0;
+	virtual void parseSource( Source& source, Lexer& lexer ) = 0;
 	virtual void showExpectedTokens() = 0;
 
 };
