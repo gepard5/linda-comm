@@ -1,6 +1,6 @@
-#include <stdlib.h>
 #include <utility>
 #include <functional>
+
 #include "parser.h"
 #include "lambda_generator.h"
 #include "lexer.h"
@@ -10,13 +10,10 @@
 class TemplateParser : public Parser {
 public:
 	TemplateParser();
-	~TemplateParser();
 	void parseSource( Source& source, const Lexer& lexer ) override;
-	void printInfo() const override;
-	void printStatus() const override;
 	void showExpectedTokens() override;
 
-	LindaTemplate getLindaValue() const
+	LindaTemplate getLindaTemplate() const
 	{ return lv; }
 
 private:

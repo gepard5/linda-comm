@@ -6,6 +6,9 @@
 #include "linda_base.h"
 #include "linda_value.h"
 #include "linda_template.h"
+#include "linda_parser.h"
+#include "template_parser.h"
+#include "lexer.h"
 
 class LindaCommunicator {
 public:
@@ -26,4 +29,7 @@ public:
 		   	int timeout = -1);
 	LindaValue read(const LindaBase&, int timeout = -1);
 private:
+	Lexer lexer;
+	LindaParser lp;
+	TemplateParser lt;
 };

@@ -11,6 +11,7 @@ TemplateParser::TemplateParser() {
 	expected_tokens[AFTER_MESSAGE] = { Token::END_OF_FILE };
 
 	semantic_actions[Token::OBJECT_START] = std::bind( &TemplateParser::onObjectStart, this );
+	semantic_actions[Token::OBJECT_END] = std::bind( &TemplateParser::onObjectEnd, this );
 	semantic_actions[Token::EQUAL] = std::bind( &TemplateParser::onEqual, this );
 	semantic_actions[Token::LESS] = std::bind( &TemplateParser::onLess, this );
 	semantic_actions[Token::LESS_EQUAL] = std::bind( &TemplateParser::onLessEqual, this );
@@ -20,11 +21,7 @@ TemplateParser::TemplateParser() {
 	semantic_actions[Token::ZERO] = std::bind( &TemplateParser::onNumber, this );
 	semantic_actions[Token::NUMBER] = std::bind( &TemplateParser::onNumber, this );
 	semantic_actions[Token::STRING] = std::bind( &TemplateParser::onString, this );
-}
-
-void TemplateParser::printInfo() const
-{
-	std::cout<<lv.toString()<<std::endl;
+	semantic_actions[Token::VALUE_SEPARATOR] = std::bind( &TemplateParser::onValueSeparator, this );
 }
 
 bool TemplateParser::isTokenTypeExpected(const Token::TYPE& type)
@@ -117,11 +114,6 @@ void TemplateParser::onValueSeparator() {
 
 void TemplateParser::onObjectEnd() {
 	state = STATE::AFTER_MESSAGE;
-}
-
-void TemplateParser::printStatus() const
-{
-	std::cout<<"Parser status"<<std::endl;
 }
 
 void TemplateParser::showExpectedTokens()

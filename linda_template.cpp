@@ -1,3 +1,4 @@
+#include <iostream>
 
 #include "linda_template.h"
 
@@ -12,6 +13,7 @@ bool LindaTemplate::isMatching(std::list<LTPair> lv) const
 	for( auto& checker : value_checkers )
 	{
 		result &= checker( *value );
+		std::cout<<"Result: "<<result<<std::endl;
 		++value;
 	}
 	return result;

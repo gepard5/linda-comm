@@ -16,7 +16,7 @@ public:
 	Token getNextToken(Source& source) const;
 
 private:
-	Token::TYPE getTokenType( const std::string& ) const;
+	Token::TYPE getTokenType( char ) const;
 	Token::TYPE getOperatorType( const std::string& ) const;
 	using StringSet = std::set<std::string>;
 	using TokenValues = std::set< std::pair<Token::TYPE, StringSet> >;
@@ -25,7 +25,7 @@ private:
 	{ return whitespace.count(c) == 1; }
 
 	std::set<char> whitespace;
-	TokenValues token_values;
+	std::set< std::pair<Token::TYPE, std::set<char>> > token_values;
 	TokenValues operator_values;
 };
 

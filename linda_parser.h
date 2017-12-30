@@ -1,5 +1,5 @@
-#include <stdlib.h>
 #include <functional>
+
 #include "linda_value.h"
 #include "linda_base.h"
 #include "parser.h"
@@ -7,10 +7,7 @@
 class LindaParser : public Parser {
 public:
 	LindaParser();
-	~LindaParser();
 	void parseSource( Source& source, const Lexer& lexer ) override;
-	void printInfo() const override;
-	void printStatus() const override;
 	void showExpectedTokens() override;
 
 	LindaValue getLindaValue() const

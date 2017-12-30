@@ -1,6 +1,10 @@
 #ifndef __LAMBDA_GENERATOR__
 #define __LAMBDA_GENERATOR__
 
+#include <utility>
+#include <functional>
+#include <map>
+
 #include "linda_base.h"
 
 class LambdaGenerator {

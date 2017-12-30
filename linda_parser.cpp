@@ -12,11 +12,8 @@ LindaParser::LindaParser() {
 	semantic_actions[Token::ZERO] = std::bind( &LindaParser::onNumber, this );
 	semantic_actions[Token::NUMBER] = std::bind( &LindaParser::onNumber, this );
 	semantic_actions[Token::STRING] = std::bind( &LindaParser::onString, this );
-}
-
-void LindaParser::printInfo() const
-{
-	std::cout<<lv.toString()<<std::endl;
+	semantic_actions[Token::VALUE_SEPARATOR] = std::bind( &LindaParser::onValueSeparator, this );
+	semantic_actions[Token::OBJECT_END] = std::bind( &LindaParser::onObjectEnd, this );
 }
 
 bool LindaParser::isTokenTypeExpected(const Token::TYPE& type)
@@ -44,12 +41,12 @@ void LindaParser::onObjectStart() {
 }
 
 void LindaParser::onNumber() {
-	lv.addValue( { LindaBase::Type::INTEGER, token.getValue() } );
+	lv.addValue( std::make_pair(LindaBase::Type::INTEGER, token.getValue() ) );
 	state = STATE::AFTER_VALUE;
 }
 
 void LindaParser::onString() {
-	lv.addValue( { LindaBase::Type::STRING, token.getValue() } );
+	lv.addValue( std::make_pair( LindaBase::Type::STRING, token.getValue() ) );
 	state = STATE::AFTER_VALUE;
 }
 
@@ -59,11 +56,6 @@ void LindaParser::onValueSeparator() {
 
 void LindaParser::onObjectEnd() {
 	state = STATE::AFTER_MESSAGE;
-}
-
-void LindaParser::printStatus() const
-{
-	std::cout<<"Parser status"<<std::endl;
 }
 
 void LindaParser::showExpectedTokens()

@@ -2,7 +2,6 @@
 #include <sstream>
 #include <vector>
 #include <iterator>
-#include <regex>
 
 #include "lambda_generator.h"
 #include "parser_exceptions.h"
@@ -55,18 +54,10 @@ std::function<bool(std::pair<LindaBase::Type, std::string>)> LambdaGenerator::ge
 		throw UnreadyComparator();
 
 	if( curr_type == Type::STRING ) {
-		if( curr_string.empty() ) {
-			return [=](std::pair<LindaBase::Type, std::string> p) {
-				if( p.first != LindaBase::Type::STRING ) return false;
-
-				return p.second.empty();
-			};
-		}
-
 		if( curr_operator == Operator::EQUAL ) {
 			std::vector<std::string> splitted = split(curr_string, '*');
 
-			return [=](std::pair<LindaBase::Type, std::string> p) {
+			return [splitted](std::pair<LindaBase::Type, std::string> p) {
 				if( p.first != LindaBase::Type::STRING ) return false;
 				int found = 0;
 				for( const auto& s : splitted )
@@ -85,14 +76,18 @@ std::function<bool(std::pair<LindaBase::Type, std::string>)> LambdaGenerator::ge
 		if( curr_string.find('*') != std::string::npos )
 			throw InvalidTokenException(curr_string);
 
-		return [=](std::pair<LindaBase::Type, std::string> p) {
+		auto compare_function = string_functions[curr_operator];
+
+		return [curr_str = this->curr_string, compare_function](std::pair<LindaBase::Type, std::string> p) {
 			if( p.first != LindaBase::Type::STRING ) return false;
 
-			return string_functions[curr_operator](p.second, curr_string);
+			return compare_function(p.second, curr_str);
 		};
 	}
 	else if( curr_type == Type::INTEGER ) {
-		return [=](std::pair<LindaBase::Type, std::string> p) {
+		auto compare_function = integer_functions[curr_operator];
+
+		return [curr_val = this->curr_value, compare_function](std::pair<LindaBase::Type, std::string> p) {
 			if( p.first != LindaBase::Type::INTEGER ) return false;
 			int parsed_value;
 			try{
@@ -101,7 +96,7 @@ std::function<bool(std::pair<LindaBase::Type, std::string>)> LambdaGenerator::ge
 			catch(std::invalid_argument& e)
 			{ return false; }
 
-			return integer_functions[curr_operator](parsed_value, curr_value);
+			return compare_function(parsed_value, curr_val);
 		};
 	}
 }

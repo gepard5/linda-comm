@@ -1,21 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  token.h
- *
- *    Description:  Parsing icinga configuration and showing connections between its objects
- *
- *        Version:  1.0
- *        Created:  17.04.2017 22:50:44
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author: Michał Glinka
- *   Organization: Politechnika Warszawska
- *
- * =====================================================================================
- */
-
 #ifndef TOKEN_H
 #define TOKEN_H
 

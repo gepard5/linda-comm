@@ -5,14 +5,15 @@
 Lexer::Lexer() {
 	whitespace = { ' ', '\t', '\n' };
 	token_values = {
-		{ Token::OBJECT_START, { "(" } },
-		{ Token::OBJECT_END, { ")" } },
-		{ Token::VALUE_SEPARATOR, { "," } },
-		{ Token::OPERATOR, { "=", "<", ">" } },
-		{ Token::STRING_EDGE, { "\"" } },
-		{ Token::ZERO, { "0" } },
-		{ Token::NUMBER, { "1", "2", "3", "4", "5", "6", "7", "8", "9" } },
-		{ Token::MATCHALL_SIGN, { "*" } }
+		{ Token::OBJECT_START, { '(' } },
+		{ Token::OBJECT_END, { ')' } },
+		{ Token::VALUE_SEPARATOR, { ',' } },
+		{ Token::OPERATOR, { '=', '<', '>' } },
+		{ Token::STRING_EDGE, { '\"' } },
+		{ Token::ZERO, { '0' } },
+		{ Token::NUMBER, { '1', '2', '3', '4', '5', '6', '7', '8', '9' } },
+		{ Token::MATCHALL_SIGN, { '*' } },
+		{ Token::END_OF_FILE, { EOF } }
 	};
 	operator_values = {
 		{ Token::LESS, { "<" } },
@@ -31,7 +32,7 @@ Token Lexer::getNextToken(Source& source) const {
 	}
 
 	curr_token.push_back( source.getChar() );
-	auto type = getTokenType( curr_token );
+	auto type = getTokenType( curr_token[0] );
 
 	if( type == Token::OPERATOR ) {
 		if( source.peekChar() == '=' ) {
@@ -40,23 +41,28 @@ Token Lexer::getNextToken(Source& source) const {
 		type = getOperatorType( curr_token );
 	}
 	else if( type == Token::STRING_EDGE ) {
+		std::string new_string;
 		while( source.peekChar() != EOF && source.peekChar() != '\"' ) {
-			curr_token.push_back( source.getChar() );
+			new_string.push_back( source.getChar() );
 		}
+		source.getChar();
+		curr_token = new_string;
 		type = Token::STRING;
 	}
 	else if( type == Token::NUMBER ) {
-		auto next_type = getTokenType( std::string( 1, source.peekChar() ) );
-		while( next_type == Token::NUMBER || Token::ZERO ) {
+		auto next_type = getTokenType( source.peekChar() );
+		while( next_type == Token::NUMBER || next_type == Token::ZERO ) {
 			curr_token.push_back( source.getChar() );
-			next_type = getTokenType( std::string( 1, source.peekChar() ) );
+			next_type = getTokenType( source.peekChar() );
 		}
 	}
+	if( type == Token::UNRECOGNISED )
+		throw UnrecognisedTokenException( curr_token );
 
 	return Token( curr_token, type );
 }
 
-Token::TYPE Lexer::getTokenType( const std::string& token ) const
+Token::TYPE Lexer::getTokenType( char token ) const
 {
 	for( const auto& itr : token_values )
 	{
@@ -66,7 +72,7 @@ Token::TYPE Lexer::getTokenType( const std::string& token ) const
 		}
 	}
 
-	throw UnrecognisedTokenException(token);
+	return Token::UNRECOGNISED;
 }
 
 Token::TYPE Lexer::getOperatorType( const std::string& token ) const
@@ -79,6 +85,6 @@ Token::TYPE Lexer::getOperatorType( const std::string& token ) const
 		}
 	}
 
-	throw UnrecognisedTokenException(token);
+	return Token::UNRECOGNISED;
 }
 
