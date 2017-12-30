@@ -20,6 +20,7 @@ std::map<Token::TYPE, std::string> Token::token_types = {
 	{ UNRECOGNISED, "unrecognised" },
 	{ ZERO, "zero" },
 	{ NUMBER, "number" },
+	{ MINUS, "minus" },
 	{ ANY, "any" }
 };
 

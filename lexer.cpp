@@ -9,9 +9,10 @@ Lexer::Lexer() {
 		{ Token::OBJECT_END, { ')' } },
 		{ Token::VALUE_SEPARATOR, { ',' } },
 		{ Token::OPERATOR, { '=', '<', '>' } },
-		{ Token::STRING_EDGE, { '\"' } },
+		{ Token::STRING_EDGE, { STRING_END } },
 		{ Token::ZERO, { '0' } },
 		{ Token::NUMBER, { '1', '2', '3', '4', '5', '6', '7', '8', '9' } },
+		{ Token::MINUS, {'-'} },
 		{ Token::MATCHALL_SIGN, { '*' } },
 		{ Token::END_OF_FILE, { EOF } }
 	};
@@ -24,42 +25,70 @@ Lexer::Lexer() {
 	};
 }
 
-Token Lexer::getNextToken(Source& source) const {
-	std::string curr_token;
+Token Lexer::getNextToken(Source& source) {
+	curr_token.clear();
 	//skip white characters
 	while( source.peekChar() != EOF && isWhitespace( source.peekChar() ) ) {
 		source.getChar();
 	}
 
 	curr_token.push_back( source.getChar() );
-	auto type = getTokenType( curr_token[0] );
+	type = getTokenType( curr_token[0] );
 
 	if( type == Token::OPERATOR ) {
-		if( source.peekChar() == '=' ) {
-			curr_token.push_back( source.getChar() );
-		}
-		type = getOperatorType( curr_token );
 	}
 	else if( type == Token::STRING_EDGE ) {
-		std::string new_string;
-		while( source.peekChar() != EOF && source.peekChar() != '\"' ) {
-			new_string.push_back( source.getChar() );
-		}
-		source.getChar();
-		curr_token = new_string;
-		type = Token::STRING;
+		getString(source);
 	}
 	else if( type == Token::NUMBER ) {
-		auto next_type = getTokenType( source.peekChar() );
-		while( next_type == Token::NUMBER || next_type == Token::ZERO ) {
-			curr_token.push_back( source.getChar() );
-			next_type = getTokenType( source.peekChar() );
-		}
+		getNumber(source);
 	}
+	else if( type == Token::MINUS ) {
+		getSignedNumber(source);
+	}
+
 	if( type == Token::UNRECOGNISED )
 		throw UnrecognisedTokenException( curr_token );
 
 	return Token( curr_token, type );
+}
+
+void Lexer::getOperator( Source& source )
+{
+	if( source.peekChar() == '=' ) {
+		curr_token.push_back( source.getChar() );
+	}
+	type = getOperatorType( curr_token );
+}
+
+void Lexer::getString( Source& source )
+{
+	std::string new_string;
+	while( source.peekChar() != EOF && source.peekChar() != STRING_END ) {
+		new_string.push_back( source.getChar() );
+	}
+	source.getChar();
+	curr_token = new_string;
+
+	type = Token::STRING;
+}
+
+void Lexer::getSignedNumber( Source& source )
+{
+	auto next_type = getTokenType( source.peekChar() );
+	if( next_type != Token::NUMBER )
+		throw InvalidTokenException( curr_token );
+
+	getNumber(source);
+}
+
+void Lexer::getNumber( Source& source )
+{
+	auto next_type = getTokenType( source.peekChar() );
+	while( next_type == Token::NUMBER || next_type == Token::ZERO ) {
+		curr_token.push_back( source.getChar() );
+		next_type = getTokenType( source.peekChar() );
+	}
 }
 
 Token::TYPE Lexer::getTokenType( char token ) const

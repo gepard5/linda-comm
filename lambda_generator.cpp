@@ -6,20 +6,22 @@
 #include "lambda_generator.h"
 #include "parser_exceptions.h"
 
-template<typename Out>
-void split(const std::string &s, char delim, Out result) {
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        *(result++) = item;
-    }
-}
+namespace str_utils {
+	template<typename Out>
+	void split(const std::string &s, char delim, Out result) {
+		std::stringstream ss(s);
+		std::string item;
+		while (std::getline(ss, item, delim)) {
+			*(result++) = item;
+		}
+	}
 
-std::vector<std::string> split(const std::string &s, char delim) {
-    std::vector<std::string> elems;
-    split(s, delim, std::back_inserter(elems));
-    return elems;
-}
+	std::vector<std::string> split(const std::string &s, char delim) {
+		std::vector<std::string> elems;
+		split(s, delim, std::back_inserter(elems));
+		return elems;
+	}
+};
 
 LambdaGenerator::LambdaGenerator()
 {
@@ -38,6 +40,7 @@ LambdaGenerator::LambdaGenerator()
 	string_functions[EQUAL] = [](std::string a, std::string b) { return a == b; };
 	string_functions[ANY] = [](std::string a, std::string b) { return true; };
 	string_functions[NONE_OPERATOR] = [](std::string a, std::string b) { return false; };
+	clearAll();
 }
 
 void LambdaGenerator::clearAll()
@@ -55,11 +58,11 @@ std::function<bool(std::pair<LindaBase::Type, std::string>)> LambdaGenerator::ge
 
 	if( curr_type == Type::STRING ) {
 		if( curr_operator == Operator::EQUAL ) {
-			std::vector<std::string> splitted = split(curr_string, '*');
+			std::vector<std::string> splitted = str_utils::split(curr_string, '*');
 
 			return [splitted](std::pair<LindaBase::Type, std::string> p) {
 				if( p.first != LindaBase::Type::STRING ) return false;
-				int found = 0;
+				unsigned found = 0;
 				for( const auto& s : splitted )
 				{
 					if( s.empty() ) continue;
@@ -99,4 +102,8 @@ std::function<bool(std::pair<LindaBase::Type, std::string>)> LambdaGenerator::ge
 			return compare_function(parsed_value, curr_val);
 		};
 	}
+
+	return [](std::pair<LindaBase::Type, std::string> p) {
+		return false;
+	};
 }

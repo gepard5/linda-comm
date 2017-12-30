@@ -13,20 +13,27 @@
 class Lexer {
 public:
 	Lexer();
-	Token getNextToken(Source& source) const;
+	Token getNextToken(Source& source);
 
 private:
+	void getString(Source&);
+	void getOperator(Source&);
+	void getSignedNumber(Source&);
+	void getNumber(Source&);
+
 	Token::TYPE getTokenType( char ) const;
 	Token::TYPE getOperatorType( const std::string& ) const;
 	using StringSet = std::set<std::string>;
-	using TokenValues = std::set< std::pair<Token::TYPE, StringSet> >;
 
 	bool isWhitespace(const char c) const
 	{ return whitespace.count(c) == 1; }
 
-	std::set<char> whitespace;
-	std::set< std::pair<Token::TYPE, std::set<char>> > token_values;
-	TokenValues operator_values;
+	std::string curr_token;
+	Token::TYPE type;
+	static const std::set<char> whitespace;
+	static const std::set< std::pair<Token::TYPE, std::set<char>> > token_values;
+	static const std::set< std::pair<Token::TYPE, StringSet> > operator_values;
+	const char STRING_END {'\"'};
 };
 
 #endif

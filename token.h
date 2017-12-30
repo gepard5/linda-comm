@@ -23,6 +23,7 @@ public:
 		STRING,									//ciągi znaków
 		END_OF_FILE,							//koniec pliku
 		UNRECOGNISED,
+		MINUS,
 		ZERO,
 		NUMBER,
 		ANY
