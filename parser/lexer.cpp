@@ -3,6 +3,7 @@
 
 
 const char Lexer::STRING_END = '\"';
+const char Lexer::MATCH_ANY = '*';
 const std::set< std::pair<Token::TYPE, std::set<char>> > Lexer::token_values = {
 	{ Token::OBJECT_START, { '(' } },
 	{ Token::OBJECT_END, { ')' } },
@@ -12,7 +13,7 @@ const std::set< std::pair<Token::TYPE, std::set<char>> > Lexer::token_values = {
 	{ Token::ZERO, { '0' } },
 	{ Token::NUMBER, { '1', '2', '3', '4', '5', '6', '7', '8', '9' } },
 	{ Token::MINUS, {'-'} },
-	{ Token::MATCHALL_SIGN, { '*' } },
+	{ Token::MATCHALL_SIGN, { MATCH_ANY } },
 	{ Token::END_OF_FILE, { EOF } }
 };
 const std::set<char> Lexer::whitespace = { ' ', '\t', '\n' };

@@ -33,6 +33,7 @@ private:
 	static const std::set< std::pair<Token::TYPE, std::set<char>> > token_values;
 	static const std::set< std::pair<Token::TYPE, StringSet> > operator_values;
 	static const char STRING_END;
+	static const char MATCH_ANY;
 };
 
 #endif

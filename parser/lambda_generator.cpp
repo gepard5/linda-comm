@@ -40,6 +40,7 @@ LambdaGenerator::LambdaGenerator()
 	string_functions[EQUAL] = [](std::string a, std::string b) { return a == b; };
 	string_functions[ANY] = [](std::string a, std::string b) { return true; };
 	string_functions[NONE_OPERATOR] = [](std::string a, std::string b) { return false; };
+
 	clearAll();
 }
 
@@ -72,7 +73,8 @@ std::function<bool(std::pair<LindaBase::Type, std::string>)> LambdaGenerator::ge
 					}
 					found += s.size();
 				}
-				return true;
+				bool ends_with_star = p.second.back() == '*';
+				return found == p.second.size() || ends_with_star;
 			};
 		}
 
