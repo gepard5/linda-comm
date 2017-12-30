@@ -1,12 +1,11 @@
 #include <functional>
 
 #include "linda_value.h"
-#include "linda_base.h"
 #include "parser.h"
 
-class LindaParser : public Parser {
+class ValueParser : public Parser {
 public:
-	LindaParser();
+	ValueParser();
 	void parseSource( Source& source, Lexer& lexer ) override;
 	void showExpectedTokens() override;
 

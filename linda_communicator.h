@@ -3,10 +3,9 @@
 #include <string>
 #include <functional>
 
-#include "linda_base.h"
 #include "linda_value.h"
 #include "linda_template.h"
-#include "linda_parser.h"
+#include "value_parser.h"
 #include "template_parser.h"
 #include "lexer.h"
 
@@ -30,6 +29,6 @@ public:
 	LindaValue read(const LindaBase&, int timeout = -1);
 private:
 	Lexer lexer;
-	LindaParser lp;
-	TemplateParser lt;
+	ValueParser value_parser;
+	TemplateParser template_parser;
 };

@@ -8,7 +8,7 @@ class LindaValue : public LindaBase {
 public:
 	LindaValue() {}
 	LindaValue(const std::list<LTPair>& l ) : values(l) {}
-	std::string toString() const override;
+	std::string toString() const;
 
 	std::list<LTPair> getValues() const
 	{ return values; }

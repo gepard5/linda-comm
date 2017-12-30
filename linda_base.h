@@ -10,8 +10,6 @@ public:
 		STRING
 	};
 	using LTPair = std::pair<Type, std::string>;
-
-	virtual std::string toString() const = 0;
 };
 
 #endif // linda_base

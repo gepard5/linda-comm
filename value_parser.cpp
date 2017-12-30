@@ -1,28 +1,26 @@
-#include <stdlib.h>
+#include "value_parser.h"
 
-#include "linda_parser.h"
-
-LindaParser::LindaParser() {
+ValueParser::ValueParser() {
 	expected_tokens[BEFORE_MESSAGE] = { Token::OBJECT_START };
 	expected_tokens[BEFORE_VALUE] = { Token::ZERO, Token::NUMBER, Token::STRING };
 	expected_tokens[AFTER_VALUE] = { Token::VALUE_SEPARATOR, Token::OBJECT_END };
 	expected_tokens[AFTER_MESSAGE] = { Token::END_OF_FILE };
 
-	semantic_actions[Token::OBJECT_START] = std::bind( &LindaParser::onObjectStart, this );
-	semantic_actions[Token::ZERO] = std::bind( &LindaParser::onNumber, this );
-	semantic_actions[Token::NUMBER] = std::bind( &LindaParser::onNumber, this );
-	semantic_actions[Token::STRING] = std::bind( &LindaParser::onString, this );
-	semantic_actions[Token::VALUE_SEPARATOR] = std::bind( &LindaParser::onValueSeparator, this );
-	semantic_actions[Token::OBJECT_END] = std::bind( &LindaParser::onObjectEnd, this );
+	semantic_actions[Token::OBJECT_START] = std::bind( &ValueParser::onObjectStart, this );
+	semantic_actions[Token::ZERO] = std::bind( &ValueParser::onNumber, this );
+	semantic_actions[Token::NUMBER] = std::bind( &ValueParser::onNumber, this );
+	semantic_actions[Token::STRING] = std::bind( &ValueParser::onString, this );
+	semantic_actions[Token::VALUE_SEPARATOR] = std::bind( &ValueParser::onValueSeparator, this );
+	semantic_actions[Token::OBJECT_END] = std::bind( &ValueParser::onObjectEnd, this );
 }
 
-bool LindaParser::isTokenTypeExpected(const Token::TYPE& type)
+bool ValueParser::isTokenTypeExpected(const Token::TYPE& type)
 {
 	if( type == Token::ANY ) return true;
 	return expected_tokens[state].count( type ) != 0;
 }
 
-void LindaParser::parseSource( Source& source, Lexer& lexer) {
+void ValueParser::parseSource( Source& source, Lexer& lexer) {
 	state = STATE::BEFORE_MESSAGE;
 	token = lexer.getNextToken(source);
 	while( token.getType() != Token::END_OF_FILE ) {
@@ -35,30 +33,30 @@ void LindaParser::parseSource( Source& source, Lexer& lexer) {
 	}
 }
 
-void LindaParser::onObjectStart() {
+void ValueParser::onObjectStart() {
 	lv = LindaValue();
 	state = STATE::BEFORE_VALUE;
 }
 
-void LindaParser::onNumber() {
+void ValueParser::onNumber() {
 	lv.addValue( std::make_pair(LindaBase::Type::INTEGER, token.getValue() ) );
 	state = STATE::AFTER_VALUE;
 }
 
-void LindaParser::onString() {
+void ValueParser::onString() {
 	lv.addValue( std::make_pair( LindaBase::Type::STRING, token.getValue() ) );
 	state = STATE::AFTER_VALUE;
 }
 
-void LindaParser::onValueSeparator() {
+void ValueParser::onValueSeparator() {
 	state = STATE::BEFORE_VALUE;
 }
 
-void LindaParser::onObjectEnd() {
+void ValueParser::onObjectEnd() {
 	state = STATE::AFTER_MESSAGE;
 }
 
-void LindaParser::showExpectedTokens()
+void ValueParser::showExpectedTokens()
 {
 	std::cout<<"Expected tokens: "<<std::endl;
 	for( auto& t : expected_tokens[state] )
