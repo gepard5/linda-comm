@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include "file_manager_exceptions.h"
 
 class FileManager {
 public:
@@ -24,12 +25,10 @@ private:
     void lockShared();
     void lockExclusive();
     void unlock();
-    void loadLinesToCache();
+    void loadLinesToCache(bool b);
     std::string loadCurrentLine();
     void deleteCurrentLine();
-
     void findEmptyLine();
-
     void fillFileWithEmptyLines();
 };
 

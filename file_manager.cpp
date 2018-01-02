@@ -5,7 +5,7 @@
 
 std::string FileManager::getNextLine(int timeout, bool loop) {
     if (lineCache.empty() || ++currentLineInBlock >= LINES_IN_BLOCK) {
-        loadLinesToCache();
+        loadLinesToCache(loop);
     }
     return lineCache[currentLineInBlock];
 }
@@ -47,8 +47,14 @@ void FileManager::setFile(const std::string &filepath) {
     }
 }
 
-void FileManager::loadLinesToCache() {
-    currentBlock++;
+void FileManager::loadLinesToCache(bool loop) {
+    if (++currentBlock >= BLOCKS_IN_FILE) {
+        if (loop) {
+            currentBlock = 0;
+        } else {
+            throw EndOfFileException();
+        }
+    }
     lockShared();
     char buffer[LINE_SIZE + 1];
     lseek(fd, currentBlock * BLOCK_SIZE, SEEK_SET);
