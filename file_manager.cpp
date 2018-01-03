@@ -45,20 +45,19 @@ void FileManager::setFile(const std::string &filepath) {
         fd = open(filepath.c_str(), O_RDWR);
         fillFileWithEmptyLines();
     }
+    fillNextBlocksArray();
 }
 
 void FileManager::loadLinesToCache(bool loop) {
     if (nextBlocks.empty()) {
+        if (!loop) {
+            throw EndOfFileException();
+        }
         fillNextBlocksArray();
     }
     currentBlock = (int) nextBlocks.back();
     nextBlocks.pop_back();
-    if (currentBlock >= BLOCKS_IN_FILE) {
-        if (!loop) {
-            throw EndOfFileException();
-        }
-        currentBlock = 0;
-    }
+
     lockShared();
     for (currentLineInBlock = 0; currentLineInBlock < LINES_IN_BLOCK; ++currentLineInBlock) {
         lineCache.push_back( loadCurrentLine() );
