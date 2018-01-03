@@ -4,10 +4,11 @@
 #include "file_manager.h"
 
 std::string FileManager::getNextLine(int timeout, bool loop) {
-    if (lineCache.empty() || ++currentLineInBlock >= LINES_IN_BLOCK) {
+    if (lineCache.empty() || currentLineInBlock >= LINES_IN_BLOCK) {
         loadLinesToCache(loop);
     }
-    return lineCache[currentLineInBlock];
+
+    return lineCache[currentLineInBlock++];
 }
 
 bool FileManager::deleteLine(const std::string &line, int timeout) {
@@ -17,15 +18,15 @@ bool FileManager::deleteLine(const std::string &line, int timeout) {
         unlock();
         return false;
     }
-    unlock();
     deleteCurrentLine();
+    unlock();
     return true;
 }
 
 void FileManager::writeLine(const std::string &line) {
     findEmptyLine();
     lockExclusive();
-    if (loadCurrentLine().compare(std::string(EMPTY_LINE)) != 0) {
+    while (loadCurrentLine().compare(std::string(EMPTY_LINE)) != 0) {
         unlock();
         findEmptyLine();
         lockExclusive();
@@ -48,21 +49,20 @@ void FileManager::setFile(const std::string &filepath) {
 }
 
 void FileManager::loadLinesToCache(bool loop) {
-    if (++currentBlock >= BLOCKS_IN_FILE) {
+    if (currentBlock >= BLOCKS_IN_FILE) {
         if (loop) {
             currentBlock = 0;
         } else {
             throw EndOfFileException();
         }
     }
+
     lockShared();
-    char buffer[LINE_SIZE + 1];
-    lseek(fd, currentBlock * BLOCK_SIZE, SEEK_SET);
-    for (int i = 0; i < LINES_IN_BLOCK; i++) {
-        read(fd, buffer, LINE_SIZE);
-        lineCache.push_back(std::string(buffer));
-    }
+    for ( currentLineInBlock = 0; currentLineInBlock < LINES_IN_BLOCK; ++currentLineInBlock)
+        lineCache.push_back( loadCurrentLine() );
     unlock();
+
+	++currentBlock;
     currentLineInBlock = 0;
 }
 
@@ -71,11 +71,11 @@ std::string FileManager::loadCurrentLine() {
     int lineOffset = currentBlock * BLOCK_SIZE + currentLineInBlock * LINE_SIZE;
     lseek(fd, lineOffset, SEEK_SET);
     read(fd, buffer, LINE_SIZE);
+
     return std::string(buffer);
 }
 
 void FileManager::deleteCurrentLine() {
-
     int lineOffset = currentBlock * BLOCK_SIZE + currentLineInBlock * LINE_SIZE;
     lseek(fd, lineOffset, SEEK_SET);
     write(fd, EMPTY_LINE, LINE_SIZE);
@@ -83,16 +83,18 @@ void FileManager::deleteCurrentLine() {
 
 
 void FileManager::findEmptyLine() {
-    while (getNextLine(-1, true).compare(std::string(EMPTY_LINE)) != 0) {
-    }
+    while (getNextLine(-1, true).compare(std::string(EMPTY_LINE)) != 0) {}
 }
 
 void FileManager::fillFileWithEmptyLines() {
-    lockExclusive();
-    for (int i = 0; i < BLOCKS_IN_FILE * LINES_IN_BLOCK; i++) {
-        write(fd, EMPTY_LINE, LINE_SIZE);
+    for ( currentBlock = 0; currentBlock < BLOCKS_IN_FILE; ++currentBlock) {
+		lockExclusive();
+		for (int j = 0; j < LINES_IN_BLOCK; ++j) {
+			write(fd, EMPTY_LINE, LINE_SIZE);
+		}
+		unlock();
     }
-    unlock();
+	currentBlock = 0;
 }
 
 void FileManager::lockShared() {
