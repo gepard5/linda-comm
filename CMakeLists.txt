@@ -21,7 +21,9 @@ set(SOURCE_FILES
         parser/value_parser.h
         file_manager.cpp
         file_manager.h
-        file_manager_exceptions.h
+        file_exceptions.h
+        file_utils.h
+        file_utils.cpp
         linda_base.h
         linda_communicator.cpp
         linda_communicator.h

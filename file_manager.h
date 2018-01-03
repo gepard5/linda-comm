@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include "file_manager_exceptions.h"
 
 class FileManager {
 public:
@@ -18,9 +17,10 @@ private:
     const static int BLOCK_SIZE = LINES_IN_BLOCK * LINE_SIZE;
     const char EMPTY_LINE[LINE_SIZE] = { '\0' };
     int fd;
-    int currentLineInBlock = -1;
-    int currentBlock = -1;
+    int currentLineInBlock;
+    int currentBlock;
 
+	std::vector<size_t> nextBlocks = {};
     std::vector<std::string> lineCache = {};
     void lockShared();
     void lockExclusive();
@@ -30,6 +30,8 @@ private:
     void deleteCurrentLine();
     void findEmptyLine();
     void fillFileWithEmptyLines();
+
+	void fillNextBlocksArray();
 };
 
 #endif // file_manager
