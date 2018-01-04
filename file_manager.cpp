@@ -1,4 +1,5 @@
 #include <fcntl.h>
+#include <signal.h>
 #include <cstring>
 #include <algorithm>
 #include "file_manager.h"
@@ -6,13 +7,33 @@
 #include "file_exceptions.h"
 
 std::string FileManager::getNextLine(int timeout, bool loop) {
+    if (timeout != -1) {
+        runTimer(timeout);
+    }
+
     if (lineCache.empty() || currentLineInBlock >= LINES_IN_BLOCK) {
         loadLinesToCache(loop);
     }
     return lineCache[currentLineInBlock++];
 }
 
+std::vector<std::string> FileManager::getAllLines() {
+    std::vector<std::string> allLines = {};
+    for (int i = 0; i < BLOCKS_IN_FILE; i++) {
+        file_utils::setLock(fd, F_RDLCK, i, BLOCK_SIZE);
+        for (int j = 0; j < LINES_IN_BLOCK; j++) {
+            std::string line = file_utils::readIn(fd, i * BLOCK_SIZE + j * LINE_SIZE, LINE_SIZE);
+            allLines.push_back(line);
+        }
+        file_utils::setLock(fd, F_UNLCK, i, BLOCK_SIZE);
+    }
+    return allLines;
+}
+
 bool FileManager::deleteLine(const std::string &line, int timeout) {
+    if (timeout != -1) {
+        runTimer(timeout);
+    }
     lockExclusive();
     std::string currentLine = loadCurrentLine();
     if (line != currentLine) {
@@ -111,4 +132,21 @@ void FileManager::lockExclusive() {
 
 void FileManager::unlock() {
     file_utils::setLock(fd, F_UNLCK, currentBlock, BLOCK_SIZE);
+}
+
+void FileManager::runTimer(int timeout) {
+    timer_t timer;
+    struct sigevent se;
+    struct itimerspec ts;
+
+    se.sigev_notify = SIGEV_SIGNAL;
+    se.sigev_signo = SIGALRM;
+
+    ts.it_value.tv_sec = timeout / 1000;
+    ts.it_value.tv_nsec = (timeout % 1000) * 1000000;
+    ts.it_interval.tv_sec = 0;
+    ts.it_interval.tv_nsec = 0;
+
+    timer_create(CLOCK_MONOTONIC, &se, &timer);
+    timer_settime(timer, 0, &ts, 0);
 }

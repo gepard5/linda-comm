@@ -34,3 +34,4 @@ set(SOURCE_FILES
         main.cpp)
 
 add_executable(linda_comm ${SOURCE_FILES})
+target_link_libraries(linda_comm rt)

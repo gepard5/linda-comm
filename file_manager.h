@@ -7,6 +7,7 @@
 class FileManager {
 public:
 	std::string getNextLine(int timeout = -1, bool loop = false);
+    std::vector<std::string> getAllLines();
 	bool deleteLine(const std::string& line, int timeout = -1);
 	void writeLine(const std::string& line);
 	void setFile(const std::string& filepath);
@@ -32,6 +33,8 @@ private:
     void fillFileWithEmptyLines();
 
 	void fillNextBlocksArray();
+
+    void runTimer(int timeout);
 };
 
 #endif // file_manager
