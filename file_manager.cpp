@@ -1,8 +1,17 @@
 #include <fcntl.h>
 #include <cstring>
 #include <algorithm>
+#include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <signal.h>
+
+#include <thread>
+#include <chrono>
+#include <future>
+#include <functional>
+
 #include "file_manager.h"
-#include "file_utils.h"
 #include "file_exceptions.h"
 
 std::string FileManager::getNextLine(int timeout, bool loop) {
@@ -33,12 +42,12 @@ void FileManager::writeLine(const std::string &line) {
         lockExclusive();
     }
     int lineOffset = currentBlock * BLOCK_SIZE + currentLineInBlock * LINE_SIZE;
-    file_utils::writeIn(fd, lineOffset, line.c_str(), LINE_SIZE);
+    writeIn(lineOffset, line.c_str());
     unlock();
 }
 
 void FileManager::setFile(const std::string &filepath) {
-    if (file_utils::exists(filepath)) {
+    if (exists(filepath)) {
         fd = open(filepath.c_str(), O_RDWR);
     } else {
         creat(filepath.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
@@ -68,12 +77,12 @@ void FileManager::loadLinesToCache(bool loop) {
 
 std::string FileManager::loadCurrentLine() {
     int lineOffset = currentBlock * BLOCK_SIZE + currentLineInBlock * LINE_SIZE;
-    return file_utils::readIn(fd, lineOffset, LINE_SIZE);
+    return readIn(lineOffset);
 }
 
 void FileManager::deleteCurrentLine() {
     int lineOffset = currentBlock * BLOCK_SIZE + currentLineInBlock * LINE_SIZE;
-    file_utils::writeIn(fd, lineOffset, EMPTY_LINE, LINE_SIZE);
+    writeIn(lineOffset, EMPTY_LINE);
 }
 
 
@@ -86,7 +95,7 @@ void FileManager::fillFileWithEmptyLines() {
 		lockExclusive();
 		for (currentLineInBlock = 0; currentLineInBlock < LINES_IN_BLOCK; ++currentLineInBlock) {
             int offset = currentBlock * BLOCK_SIZE + currentLineInBlock * LINE_SIZE;
-			file_utils::writeIn(fd, offset, EMPTY_LINE, LINE_SIZE);
+			writeIn(offset, EMPTY_LINE);
 		}
 		unlock();
     }
@@ -102,13 +111,70 @@ void FileManager::fillNextBlocksArray() {
 }
 
 void FileManager::lockShared() {
-    file_utils::setLock(fd, F_RDLCK, currentBlock, BLOCK_SIZE);
+    setLock(F_RDLCK,1);
 }
 
 void FileManager::lockExclusive() {
-    file_utils::setLock(fd, F_WRLCK, currentBlock, BLOCK_SIZE);
+    setLock(F_WRLCK,1);
 }
 
 void FileManager::unlock() {
-    file_utils::setLock(fd, F_UNLCK, currentBlock, BLOCK_SIZE);
+    setLock(F_UNLCK, 1);
+}
+
+std::string FileManager::readIn(int offset) {
+	lseek(fd, offset, SEEK_SET);
+	char buffer[LINE_SIZE + 1];
+	if (read(fd, buffer, LINE_SIZE) == -1) {
+		throw ReadingException();
+	}
+	return std::string(buffer);
+}
+
+void FileManager::writeIn(int offset, const char* data) {
+	lseek(fd, offset, SEEK_SET);
+	if (write(fd, data, LINE_SIZE) == -1) {
+		throw WritingException();
+	}
+	lseek(fd, 0, LINE_SIZE);
+}
+
+bool FileManager::setLock(short lockType, int timeout) {
+	std::promise<int> file_promise;
+	std::future<int> file_future = file_promise.get_future();
+	auto locker = [=](std::promise<int> p) {
+		flock fl = {};
+		fl.l_type = lockType;
+		fl.l_whence = SEEK_SET;
+		fl.l_start = currentBlock * BLOCK_SIZE;
+		fl.l_len = BLOCK_SIZE;
+		int result = fcntl(fd, F_SETLKW, &fl);
+
+		p.set_value(result);
+	};
+
+	std::thread file_locker( locker, std::move(file_promise) );
+	if( timeout >= 0 ) {
+		auto status = file_future.wait_for( std::chrono::milliseconds(timeout) );
+		if( status == std::future_status::timeout )
+			pthread_kill( file_locker.native_handle(), SIGUSR1 );
+	}
+
+	int result = file_future.get();
+	if (result == -1) {
+		if (errno == EINTR) {
+			return false; //timeout
+		}
+
+		if (errno == EACCES || errno == EAGAIN) {
+			throw BlockAlreadyLockedException();
+		}
+		throw UnexpectedException();
+	}
+
+	return true;
+}
+
+bool FileManager::exists(std::string filePath) {
+	return access(filePath.c_str(), F_OK) != -1;
 }

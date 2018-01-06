@@ -11,6 +11,8 @@
 
 class LindaCommunicator {
 public:
+	LindaCommunicator();
+
 	LindaValue createValue(const std::string&);
 	LindaTemplate createTemplate(const std::string&);
 
@@ -27,6 +29,7 @@ public:
 	LindaValue read(const std::list<LindaBase::LTPair>&,
 		   	int timeout = -1);
 	LindaValue read(const LindaBase&, int timeout = -1);
+
 private:
 	Lexer lexer;
 	ValueParser value_parser;
