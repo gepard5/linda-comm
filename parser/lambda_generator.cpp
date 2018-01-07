@@ -90,8 +90,9 @@ LambdaGenerator::CompareFunction LambdaGenerator::getNonEqualStringComparator()
 LambdaGenerator::CompareFunction LambdaGenerator::getEqualStringComparator()
 {
 	std::vector<std::string> splitted = str_utils::split(curr_string, '*');
+	bool ends_with_star = curr_string.back() == '*';
 
-	return [splitted](std::pair<LindaBase::Type, std::string> p) {
+	return [splitted, ends_with_star](std::pair<LindaBase::Type, std::string> p) {
 		if( p.first != LindaBase::Type::STRING ) return false;
 		unsigned found = 0;
 		for( const auto& s : splitted )
@@ -103,7 +104,6 @@ LambdaGenerator::CompareFunction LambdaGenerator::getEqualStringComparator()
 			}
 			found += s.size();
 		}
-		bool ends_with_star = p.second.back() == '*';
 		return found == p.second.size() || ends_with_star;
 	};
 }
