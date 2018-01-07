@@ -1,36 +1,34 @@
 #include <fcntl.h>
 #include <cstring>
 #include <algorithm>
-#include <errno.h>
-#include <fcntl.h>
 #include <unistd.h>
 #include <signal.h>
-
 #include <thread>
-#include <chrono>
 #include <future>
-#include <functional>
 
 #include "file_manager.h"
 #include "file_exceptions.h"
 
-std::string FileManager::getNextLine(int timeout, bool loop) {
+struct ReadLine FileManager::getNextLine(int timeout, bool loop) {
     if (lineCache.empty() || currentLineInBlock >= LINES_IN_BLOCK) {
-        loadLinesToCache(loop);
+        if (!loadLinesToCache(loop, timeout)) {
+            return {false, std::string()};
+        }
     }
-    return lineCache[currentLineInBlock++];
+    return {true, lineCache[currentLineInBlock++]};
 }
 
 bool FileManager::deleteLine(const std::string &line, int timeout) {
-    lockExclusive();
+    if (!lockExclusive(timeout)) {
+        return false;
+    }
     std::string currentLine = loadCurrentLine();
     if (line != currentLine) {
-        unlock();
+        unlock(timeout);
         return false;
     }
     deleteCurrentLine();
-    unlock();
-    return true;
+    return unlock(timeout);
 }
 
 void FileManager::writeLine(const std::string &line) {
@@ -38,15 +36,15 @@ void FileManager::writeLine(const std::string &line) {
         throw TooLongLineException(LINE_SIZE);
     }
     findEmptyLine();
-    lockExclusive();
+    lockExclusive(-1);
     while (loadCurrentLine() != std::string(EMPTY_LINE)) {
-        unlock();
+        unlock(-1);
         findEmptyLine();
-        lockExclusive();
+        lockExclusive(-1);
     }
     int lineOffset = currentBlock * BLOCK_SIZE + currentLineInBlock * LINE_SIZE;
     writeIn(lineOffset, line.c_str());
-    unlock();
+    unlock(-1);
 }
 
 void FileManager::setFile(const std::string &filepath) {
@@ -60,7 +58,7 @@ void FileManager::setFile(const std::string &filepath) {
     fillNextBlocksArray();
 }
 
-void FileManager::loadLinesToCache(bool loop) {
+bool FileManager::loadLinesToCache(bool loop, int timeout) {
     if (nextBlocks.empty()) {
         if (!loop) {
             throw EndOfFileException();
@@ -70,12 +68,17 @@ void FileManager::loadLinesToCache(bool loop) {
     currentBlock = (int) nextBlocks.back();
     nextBlocks.pop_back();
 
-    lockShared();
+    if (!lockShared(timeout)) {
+        return false;
+    }
     for (currentLineInBlock = 0; currentLineInBlock < LINES_IN_BLOCK; ++currentLineInBlock) {
         lineCache.push_back( loadCurrentLine() );
     }
-    unlock();
+    if (!unlock(timeout)) {
+        return false;
+    }
     currentLineInBlock = 0;
+    return true;
 }
 
 std::string FileManager::loadCurrentLine() {
@@ -90,17 +93,17 @@ void FileManager::deleteCurrentLine() {
 
 
 void FileManager::findEmptyLine() {
-    while (getNextLine(-1, true) != std::string(EMPTY_LINE)) {}
+    while (getNextLine(-1, true).line != std::string(EMPTY_LINE)) {}
 }
 
 void FileManager::fillFileWithEmptyLines() {
     for ( currentBlock = 0; currentBlock < BLOCKS_IN_FILE; ++currentBlock) {
-		lockExclusive();
+		lockExclusive(-1);
 		for (currentLineInBlock = 0; currentLineInBlock < LINES_IN_BLOCK; ++currentLineInBlock) {
             int offset = currentBlock * BLOCK_SIZE + currentLineInBlock * LINE_SIZE;
 			writeIn(offset, EMPTY_LINE);
 		}
-		unlock();
+		unlock(-1);
     }
 	currentBlock = 0;
     currentLineInBlock = 0;
@@ -113,16 +116,16 @@ void FileManager::fillNextBlocksArray() {
     std::random_shuffle(nextBlocks.begin(), nextBlocks.end());
 }
 
-void FileManager::lockShared() {
-    setLock(F_RDLCK,1);
+bool FileManager::lockShared(int timeout) {
+    return setLock(F_RDLCK, timeout);
 }
 
-void FileManager::lockExclusive() {
-    setLock(F_WRLCK,1);
+bool FileManager::lockExclusive(int timeout) {
+    return setLock(F_WRLCK, timeout);
 }
 
-void FileManager::unlock() {
-    setLock(F_UNLCK, 1);
+bool FileManager::unlock(int timeout) {
+    return setLock(F_UNLCK, timeout);
 }
 
 std::string FileManager::readIn(int offset) {

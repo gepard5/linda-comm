@@ -4,9 +4,14 @@
 #include <string>
 #include <vector>
 
+struct ReadLine {
+	bool success;
+	std::string line;
+};
+
 class FileManager {
 public:
-	std::string getNextLine(int timeout = -1, bool loop = false);
+	ReadLine getNextLine(int timeout = -1, bool loop = false);
 	bool deleteLine(const std::string& line, int timeout = -1);
 	void writeLine(const std::string& line);
 	void setFile(const std::string& filepath);
@@ -22,10 +27,10 @@ private:
 
 	std::vector<size_t> nextBlocks = {};
     std::vector<std::string> lineCache = {};
-    void lockShared();
-    void lockExclusive();
-    void unlock();
-    void loadLinesToCache(bool b);
+    bool lockShared(int timeout);
+    bool lockExclusive(int timeout);
+    bool unlock(int timeout);
+    bool loadLinesToCache(bool loop, int timeout);
     std::string loadCurrentLine();
     void deleteCurrentLine();
     void findEmptyLine();
