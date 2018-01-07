@@ -27,3 +27,21 @@ LindaTemplate LindaCommunicator::createTemplate(const std::string& s)
 	return template_parser.getLindaTemplate();
 }
 
+void LindaCommunicator::output(const std::string& s)
+{
+	auto lv = createValue( s );
+	output( lv );
+}
+
+void LindaCommunicator::output(const std::list<LindaBase::LTPair>& lp)
+{
+	auto lv = LindaValue(lp);
+	output( lv );
+}
+
+void LindaCommunicator::output(const LindaValue& lv)
+{
+	file_manager.writeLine( lv.toString() );
+}
+
+
