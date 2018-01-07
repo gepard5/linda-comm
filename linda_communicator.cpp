@@ -109,10 +109,12 @@ LindaValue LindaCommunicator::read(const LindaTemplate& lt, int timeout)
 	int time_passed = -1;
 	while ( time_passed < timeout ) {
 		try{
-			auto line = file_manager.getNextLine( timeout - time_passed, false );
-			lv = createValue( line );
-			if( lt.isMatching( lv.getValues() ) ) {
-				break;
+			auto line_struct = file_manager.getNextLine( timeout - time_passed, false );
+			if( line_struct.success ) {
+				lv = createValue( line_struct.line );
+				if( lt.isMatching( lv.getValues() ) ) {
+					break;
+				}
 			}
 		}
 		catch(EndOfFileException& e){
@@ -132,8 +134,9 @@ LindaValue LindaCommunicator::readNoTimeout(const LindaTemplate& lt)
 {
 	LindaValue lv;
 	while ( true ) {
-		auto line = file_manager.getNextLine( -1, true );
-		lv = createValue( line );
+		auto line_struct = file_manager.getNextLine( -1, true );
+		if( !line_struct.success ) continue;
+		lv = createValue( line_struct.line );
 		if( lt.isMatching( lv.getValues() ) )
 			break;
 	}

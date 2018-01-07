@@ -15,6 +15,7 @@ public:
 	bool deleteLine(const std::string& line, int timeout = -1);
 	void writeLine(const std::string& line);
 	void setFile(const std::string& filepath);
+	void clear();
 private:
     const static int BLOCKS_IN_FILE = 512;
     const static int LINES_IN_BLOCK = 20;

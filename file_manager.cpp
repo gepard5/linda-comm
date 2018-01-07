@@ -9,6 +9,12 @@
 #include "file_manager.h"
 #include "file_exceptions.h"
 
+void FileManager::clear()
+{
+	lineCache.clear();
+	fillNextBlocksArray();
+}
+
 struct ReadLine FileManager::getNextLine(int timeout, bool loop) {
     if (lineCache.empty() || currentLineInBlock >= LINES_IN_BLOCK) {
         if (!loadLinesToCache(loop, timeout)) {
@@ -24,11 +30,11 @@ bool FileManager::deleteLine(const std::string &line, int timeout) {
     }
     std::string currentLine = loadCurrentLine();
     if (line != currentLine) {
-        unlock(timeout);
+        unlock(-1);
         return false;
     }
     deleteCurrentLine();
-    return unlock(timeout);
+    return unlock(-1);
 }
 
 void FileManager::writeLine(const std::string &line) {
@@ -74,9 +80,7 @@ bool FileManager::loadLinesToCache(bool loop, int timeout) {
     for (currentLineInBlock = 0; currentLineInBlock < LINES_IN_BLOCK; ++currentLineInBlock) {
         lineCache.push_back( loadCurrentLine() );
     }
-    if (!unlock(timeout)) {
-        return false;
-    }
+    unlock(-1);
     currentLineInBlock = 0;
     return true;
 }
@@ -110,6 +114,7 @@ void FileManager::fillFileWithEmptyLines() {
 }
 
 void FileManager::fillNextBlocksArray() {
+	nextBlocks.clear();
     for (size_t i = 1; i < BLOCKS_IN_FILE; ++i) {
         nextBlocks.push_back(i);
     }
