@@ -3,18 +3,11 @@
 #include <cstring>
 #include <algorithm>
 #include <unistd.h>
-#include <signal.h>
 #include <thread>
 #include <future>
 
 #include "file_manager.h"
 #include "file_exceptions.h"
-
-void FileManager::clear()
-{
-	lineCache.clear();
-	fillNextBlocksArray();
-}
 
 struct ReadLine FileManager::getNextLine(int timeout, bool loop) {
     if (lineCache.empty() || currentLineInBlock >= LINES_IN_BLOCK) {
@@ -26,15 +19,19 @@ struct ReadLine FileManager::getNextLine(int timeout, bool loop) {
 }
 
 std::vector<std::string> FileManager::getAllLines() {
+    auto currentBlockOriginal = currentBlock;
+    auto currentLineInBlockOriginal = currentLineInBlock;
     std::vector<std::string> allLines = {};
-    for (int i = 0; i < BLOCKS_IN_FILE; i++) {
-        file_utils::setLock(fd, F_RDLCK, i, BLOCK_SIZE);
-        for (int j = 0; j < LINES_IN_BLOCK; j++) {
-            std::string line = file_utils::readIn(fd, i * BLOCK_SIZE + j * LINE_SIZE, LINE_SIZE);
+    for (currentBlock = 0; currentBlock < BLOCKS_IN_FILE; currentBlock++) {
+        setLock(F_RDLCK, -1);
+        for (currentLineInBlock = 0; currentLineInBlock < LINES_IN_BLOCK; currentLineInBlock++) {
+            std::string line = readIn(currentBlock * BLOCK_SIZE + currentLineInBlock * LINE_SIZE);
             allLines.push_back(line);
         }
-        file_utils::setLock(fd, F_UNLCK, i, BLOCK_SIZE);
+        setLock(F_UNLCK, -1);
     }
+    currentBlock = currentBlockOriginal;
+    currentLineInBlock = currentLineInBlockOriginal;
     return allLines;
 }
 
@@ -75,6 +72,12 @@ void FileManager::setFile(const std::string &filepath) {
         fd = open(filepath.c_str(), O_RDWR);
         fillFileWithEmptyLines();
     }
+    fillNextBlocksArray();
+}
+
+void FileManager::clear()
+{
+    lineCache.clear();
     fillNextBlocksArray();
 }
 
@@ -202,21 +205,4 @@ bool FileManager::setLock(short lockType, int timeout) {
 
 bool FileManager::exists(std::string filePath) {
 	return access(filePath.c_str(), F_OK) != -1;
-}
-
-void FileManager::runTimer(int timeout) {
-    timer_t timer;
-    struct sigevent se;
-    struct itimerspec ts;
-
-    se.sigev_notify = SIGEV_SIGNAL;
-    se.sigev_signo = SIGALRM;
-
-    ts.it_value.tv_sec = timeout / 1000;
-    ts.it_value.tv_nsec = (timeout % 1000) * 1000000;
-    ts.it_interval.tv_sec = 0;
-    ts.it_interval.tv_nsec = 0;
-
-    timer_create(CLOCK_MONOTONIC, &se, &timer);
-    timer_settime(timer, 0, &ts, 0);
 }

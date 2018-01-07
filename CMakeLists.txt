@@ -33,3 +33,4 @@ set(SOURCE_FILES
 
 add_executable(linda_comm ${SOURCE_FILES})
 target_link_libraries(linda_comm pthread)
+target_link_libraries(linda_comm boost_program_options)
