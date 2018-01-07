@@ -22,8 +22,6 @@ set(SOURCE_FILES
         file_manager.cpp
         file_manager.h
         file_exceptions.h
-        file_utils.h
-        file_utils.cpp
         linda_base.h
         linda_communicator.cpp
         linda_communicator.h
@@ -34,4 +32,4 @@ set(SOURCE_FILES
         main.cpp)
 
 add_executable(linda_comm ${SOURCE_FILES})
-target_link_libraries(linda_comm rt)
+target_link_libraries(linda_comm pthread)
