@@ -38,4 +38,10 @@ public:
 
 };
 
+class TooLongLineException : public std::logic_error {
+public:
+    TooLongLineException(size_t maxLength) :
+            std::logic_error("The line is too long. Maximum length is " + maxLength) {}
+
+};
 #endif

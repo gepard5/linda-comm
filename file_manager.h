@@ -30,9 +30,7 @@ private:
     void deleteCurrentLine();
     void findEmptyLine();
     void fillFileWithEmptyLines();
-
 	void fillNextBlocksArray();
-
 	std::string readIn(int offset);
 	void writeIn(int offset, const char* data);
 	bool setLock(short lockType, int timeout);

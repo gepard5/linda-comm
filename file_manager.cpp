@@ -34,6 +34,9 @@ bool FileManager::deleteLine(const std::string &line, int timeout) {
 }
 
 void FileManager::writeLine(const std::string &line) {
+    if (line.length() > LINE_SIZE) {
+        throw TooLongLineException(LINE_SIZE);
+    }
     findEmptyLine();
     lockExclusive();
     while (loadCurrentLine() != std::string(EMPTY_LINE)) {
