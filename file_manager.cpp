@@ -5,17 +5,21 @@
 #include <unistd.h>
 #include <thread>
 #include <future>
+#include <iostream> //delete this
 
 #include "file_manager.h"
 #include "file_exceptions.h"
 
 struct ReadLine FileManager::getNextLine(int timeout, bool loop) {
+	if(currentLineInBlock <= LINES_IN_BLOCK) ++currentLineInBlock;
     if (lineCache.empty() || currentLineInBlock >= LINES_IN_BLOCK) {
         if (!loadLinesToCache(loop, timeout)) {
             return {false, std::string()};
         }
     }
-    return {true, lineCache[currentLineInBlock++]};
+	std::cout<<"GetNextLine: "<<currentLineInBlock<<std::endl;
+	std::cout<<"line: "<<lineCache[currentLineInBlock]<<std::endl;
+    return {true, lineCache[currentLineInBlock]};
 }
 
 std::vector<std::string> FileManager::getAllLines() {
@@ -23,12 +27,12 @@ std::vector<std::string> FileManager::getAllLines() {
     auto currentLineInBlockOriginal = currentLineInBlock;
     std::vector<std::string> allLines = {};
     for (currentBlock = 0; currentBlock < BLOCKS_IN_FILE; currentBlock++) {
-        setLock(F_RDLCK, -1);
+		lockShared(-1);
         for (currentLineInBlock = 0; currentLineInBlock < LINES_IN_BLOCK; currentLineInBlock++) {
             std::string line = readIn(currentBlock * BLOCK_SIZE + currentLineInBlock * LINE_SIZE);
             allLines.push_back(line);
         }
-        setLock(F_UNLCK, -1);
+		unlock(-1);
     }
     currentBlock = currentBlockOriginal;
     currentLineInBlock = currentLineInBlockOriginal;
@@ -60,11 +64,15 @@ void FileManager::writeLine(const std::string &line) {
         lockExclusive(-1);
     }
     int lineOffset = currentBlock * BLOCK_SIZE + currentLineInBlock * LINE_SIZE;
+	std::cout<<"Current block: "<<currentBlock<<std::endl;
+	std::cout<<"Current line: "<<currentLineInBlock<<std::endl;
     writeIn(lineOffset, line.c_str());
     unlock(-1);
 }
 
 void FileManager::setFile(const std::string &filepath) {
+	//std::srand(std::time(0));
+
     if (exists(filepath)) {
         fd = open(filepath.c_str(), O_RDWR);
     } else {
@@ -72,7 +80,7 @@ void FileManager::setFile(const std::string &filepath) {
         fd = open(filepath.c_str(), O_RDWR);
         fillFileWithEmptyLines();
     }
-    fillNextBlocksArray();
+	clear();
 }
 
 void FileManager::clear()
@@ -189,6 +197,7 @@ bool FileManager::setLock(short lockType, int timeout) {
 	}
 
 	int result = file_future.get();
+	file_locker.join();
 	if (result == -1) {
 		if (errno == EINTR) {
 			return false; //timeout

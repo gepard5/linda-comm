@@ -43,6 +43,12 @@ int main( int argc, char* argv[] ) {
 		lc.setFile( file );
 	}
 
+	if( vm.count("show") ) {
+		auto allLines = lc.showAll();
+		for( const auto& line : allLines )
+			std::cout<<"Line: "<<line<<std::endl;
+	}
+
 	if( vm.count("timeout") ) {
 		timeout = vm["timeout"].as<int>();
 	}

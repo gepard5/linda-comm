@@ -30,6 +30,9 @@ public:
 	LindaValue read(const std::string&, int timeout = -1);
 	LindaValue read(const LindaTemplate&, int timeout = -1);
 
+	std::vector<std::string> showAll()
+	{ return file_manager.getAllLines(); }
+
 private:
 	LindaValue readNoTimeout(const LindaTemplate&);
 	LindaValue inputNoTimeout(const LindaTemplate&);

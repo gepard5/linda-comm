@@ -15,6 +15,7 @@ namespace {
 LindaCommunicator::LindaCommunicator(const std::string& s)
 {
 	file_manager.setFile(s);
+	file_manager.clear();
 	signal(SIGUSR1, handler);
 }
 
