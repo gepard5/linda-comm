@@ -11,18 +11,23 @@ struct ReadLine {
 
 class FileManager {
 public:
+	FileManager() : EMPTY_LINE( LINE_SIZE, char('\0') ) {}
     ReadLine getNextLine(int timeout = -1, bool loop = false);
     std::vector<std::string> getAllLines();
     bool deleteLine(const std::string &line, int timeout = -1);
     void writeLine(const std::string &line);
     void setFile(const std::string &filepath);
     void clear();
+	bool goToNextLine(int timeout, bool loop);
+    std::string getCurrentLine() const;
+	bool isEmpty( const std::string& s ) const;
+
 private:
-    const static int BLOCKS_IN_FILE = 512;
-    const static int LINES_IN_BLOCK = 20;
+    const static int BLOCKS_IN_FILE = 10;
+    const static int LINES_IN_BLOCK = 5;
     const static int LINE_SIZE = 512;
     const static int BLOCK_SIZE = LINES_IN_BLOCK * LINE_SIZE;
-    const char EMPTY_LINE[LINE_SIZE] = { '\0' };
+    const std::string EMPTY_LINE;
     int fd;
     int currentLineInBlock;
     int currentBlock;
@@ -33,8 +38,8 @@ private:
     bool lockExclusive(int timeout);
     bool unlock(int timeout);
     bool loadLinesToCache(bool loop, int timeout);
-    std::string loadCurrentLine();
     void deleteCurrentLine();
+    std::string loadCurrentLine();
     void findEmptyLine();
     void fillFileWithEmptyLines();
     void fillNextBlocksArray();

@@ -59,6 +59,7 @@ int main( int argc, char* argv[] ) {
 	}
 	else if( vm.count("output") ) {
 		auto linda = vm["output"].as<std::string>();
+		lc.output( linda );
 		std::cout<<"success"<<std::endl;
 	}
 	else if( vm.count("input") ) {

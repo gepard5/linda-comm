@@ -13,7 +13,7 @@
 class LindaCommunicator {
 public:
 	LindaCommunicator(const std::string& filename);
-	
+
 	void setFile( const std::string& f )
 	{ file_manager.setFile( f ); }
 

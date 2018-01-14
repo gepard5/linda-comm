@@ -53,7 +53,7 @@ void LindaCommunicator::output(const LindaValue& lv)
 LindaValue LindaCommunicator::input(const std::string& s, int timeout)
 {
 	auto lt = createTemplate( s );
-	return input( s, timeout );
+	return input( lt, timeout );
 }
 
 LindaValue LindaCommunicator::input(const LindaTemplate& lt, int timeout)
@@ -96,7 +96,7 @@ LindaValue LindaCommunicator::inputNoTimeout(const LindaTemplate& lt)
 LindaValue LindaCommunicator::read(const std::string& s, int timeout)
 {
 	auto lt = createTemplate( s );
-	return read( s, timeout );
+	return read( lt, timeout );
 }
 
 LindaValue LindaCommunicator::read(const LindaTemplate& lt, int timeout)
@@ -110,18 +110,17 @@ LindaValue LindaCommunicator::read(const LindaTemplate& lt, int timeout)
 	int time_passed = -1;
 	while ( time_passed < timeout ) {
 		try{
-			auto line_struct = file_manager.getNextLine( timeout - time_passed, false );
-			if( line_struct.success ) {
-				lv = createValue( line_struct.line );
-				if( lt.isMatching( lv.getValues() ) ) {
-					break;
-				}
-			}
+			if( !file_manager.goToNextLine( timeout - time_passed, false ) ) break;
+
+			auto line = file_manager.getCurrentLine();
+			lv = createValue( line );
+			if( lt.isMatching( lv.getValues() ) ) break;
 		}
 		catch(EndOfFileException& e){
 			std::this_thread::sleep_for( std::chrono::milliseconds( sleep_time ) );
 			if( sleep_time > MINIMAL_SLEEP )
 				sleep_time -= SLEEP_DIFFERENCE;
+			file_manager.clear();
 		}
 
 		auto current_time = std::chrono::high_resolution_clock::now();
@@ -135,9 +134,10 @@ LindaValue LindaCommunicator::readNoTimeout(const LindaTemplate& lt)
 {
 	LindaValue lv;
 	while ( true ) {
-		auto line_struct = file_manager.getNextLine( -1, true );
-		if( !line_struct.success ) continue;
-		lv = createValue( line_struct.line );
+		if( !file_manager.goToNextLine( -1, true ) ) break;
+
+		auto line = file_manager.getCurrentLine();
+		lv = createValue( line );
 		if( lt.isMatching( lv.getValues() ) )
 			break;
 	}

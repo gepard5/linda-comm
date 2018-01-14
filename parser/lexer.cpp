@@ -14,7 +14,7 @@ const std::set< std::pair<Token::TYPE, std::set<char>> > Lexer::token_values = {
 	{ Token::NUMBER, { '1', '2', '3', '4', '5', '6', '7', '8', '9' } },
 	{ Token::MINUS, {'-'} },
 	{ Token::MATCHALL_SIGN, { MATCH_ANY } },
-	{ Token::END_OF_FILE, { EOF } }
+	{ Token::END_OF_FILE, { EOF, '\0' } }
 };
 const std::set<char> Lexer::whitespace = { ' ', '\t', '\n' };
 
