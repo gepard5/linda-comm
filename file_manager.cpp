@@ -8,8 +8,6 @@
 #include <random>
 #include <chrono>
 
-#include <iostream>
-
 #include "file_manager.h"
 #include "file_exceptions.h"
 
@@ -33,9 +31,6 @@ bool FileManager::goToNextLine(int timeout, bool loop) {
 struct ReadLine FileManager::getNextLine(int timeout, bool loop) {
 	if( !goToNextLine( timeout, loop ) )
             return {false, std::string()};
-
-	std::cout<<"Getting next line: "<<currentLineInBlock<<std::endl;
-	std::cout<<"In block: "<<currentBlock<<std::endl;
 
     return {true, lineCache[currentLineInBlock]};
 }
@@ -117,10 +112,6 @@ bool FileManager::loadLinesToCache(bool loop, int timeout) {
             throw EndOfFileException();
         }
         fillNextBlocksArray();
-		std::cout<<"Iterating over"<<std::endl;
-		std::cout<<"New blocks array: "<<std::endl;	
-		for( auto b : nextBlocks )
-			std::cout<<"Block : "<<b<<std::endl;
     }
     currentBlock = (int) nextBlocks.back();
     nextBlocks.pop_back();
@@ -151,8 +142,6 @@ void FileManager::deleteCurrentLine() {
 
 void FileManager::findEmptyLine() {
     while ( !isEmpty(getNextLine(-1, true).line ) ) {}
-	std::cout<<"Finding next line: "<<currentLineInBlock<<std::endl;
-	std::cout<<"In block: "<<currentBlock<<std::endl;
 }
 
 bool FileManager::isEmpty( const std::string& s ) const {

@@ -73,12 +73,13 @@ LindaValue LindaCommunicator::input(const LindaTemplate& lt, int timeout)
 			time_passed = timeout;
 
 		if( file_manager.deleteLine( lv.toString(), timeout - time_passed ) )
-			break;
+			return lv;
 
 		current_time = std::chrono::high_resolution_clock::now();
 		time_passed = std::chrono::duration<double, std::milli>(current_time - start ).count();
 	}
 
+	throw LindaNotFoundException();
 	return lv;
 }
 
@@ -114,7 +115,7 @@ LindaValue LindaCommunicator::read(const LindaTemplate& lt, int timeout)
 
 			auto line = file_manager.getCurrentLine();
 			lv = createValue( line );
-			if( lt.isMatching( lv.getValues() ) ) break;
+			if( lt.isMatching( lv.getValues() ) ) return lv;
 		}
 		catch(EndOfFileException& e){
 			std::this_thread::sleep_for( std::chrono::milliseconds( sleep_time ) );
@@ -127,6 +128,7 @@ LindaValue LindaCommunicator::read(const LindaTemplate& lt, int timeout)
 		time_passed = std::chrono::duration<double, std::milli>(current_time - start ).count();
 	}
 
+	throw LindaNotFoundException();
 	return lv;
 }
 

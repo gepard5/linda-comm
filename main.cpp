@@ -13,14 +13,14 @@ int main( int argc, char* argv[] ) {
 	po::options_description desc("Allowed options");
 	try{
 		desc.add_options()
-			("help,h",					"produce help message")
-			("read,r",	po::value<std::string>(), "show dependepcies on a screen")
-			("output,o",	po::value<std::string>(), "parse only files with *cfg suffix")
-			("input,i", po::value<std::string>(), "folder to parse")
-			("console,c", 					"enter interactive mode")
-			("show,s", 						"show all lines in a file")
-			("file,f", po::value<std::string>(), "set file name")
-			("timeout,t", po::value<int>(), "set timeout value")
+			("help,h",									"produce help message")
+			("read,r",	po::value<std::string>(), 		"peek linda from file")
+			("output,o",	po::value<std::string>(), 	"add new linda to file")
+			("input,i", po::value<std::string>(), 		"read linda from file and delete it")
+			("console,c", 								"enter interactive mode")
+			("show,s", 									"show all lines in a file")
+			("file,f", po::value<std::string>(), 		"set file name")
+			("timeout,t", po::value<int>(), 			"set timeout value")
 		;
 
 		po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -72,13 +72,14 @@ int main( int argc, char* argv[] ) {
 			std::cout<<"1. Read"<<std::endl;
 			std::cout<<"2. Output"<<std::endl;
 			std::cout<<"3. Input"<<std::endl;
+			std::cout<<"4. Show file"<<std::endl;
 			std::cout<<"0. Exit"<<std::endl;
 			int choice;
 			std::cin>>choice;
 			if( choice == 0 ) {
 				return 0;
 			}
-			if( choice > 3 ) {
+			if( choice > 4 ) {
 				std::cout<<"Wrong number. Exiting."<<std::endl;
 				return 0;
 			}
@@ -95,6 +96,11 @@ int main( int argc, char* argv[] ) {
 			else if( choice == 3 ) {
 				auto lt = lc.input( s, timeout );
 				std::cout<<lt.toString()<<std::endl;
+			}
+			else if( choice == 4 ) {
+				auto allLines = lc.showAll();
+				for( const auto& line : allLines )
+					std::cout<<"Line: "<<line<<std::endl;
 			}
 		}
 	}

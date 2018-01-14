@@ -4,6 +4,13 @@
 #include <exception>
 #include <stdexcept>
 
+class LindaNotFoundException : public std::logic_error {
+	public:
+	LindaNotFoundException() : 
+		std::logic_error( "Linda not found") {}
+
+};
+
 class InvalidTokenException : public std::logic_error {
 	public:
 	InvalidTokenException( const std::string& s ) : 
