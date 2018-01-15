@@ -47,7 +47,19 @@ void LindaCommunicator::output(const std::list<LindaBase::LTPair>& lp)
 
 void LindaCommunicator::output(const LindaValue& lv)
 {
-	file_manager.writeLine( lv.toString() );
+	int sleep_time = STARTING_SLEEP;
+	while ( true ) {
+		try{
+			file_manager.writeLine( lv.toString() );
+			break;
+		}
+		catch(EndOfFileException& e){
+			std::this_thread::sleep_for( std::chrono::milliseconds( sleep_time ) );
+			if( sleep_time > MINIMAL_SLEEP )
+				sleep_time -= SLEEP_DIFFERENCE;
+			file_manager.clear();
+		}
+	}
 }
 
 LindaValue LindaCommunicator::input(const std::string& s, int timeout)
@@ -135,15 +147,24 @@ LindaValue LindaCommunicator::read(const LindaTemplate& lt, int timeout)
 LindaValue LindaCommunicator::readNoTimeout(const LindaTemplate& lt)
 {
 	LindaValue lv;
+	int sleep_time = STARTING_SLEEP;
 	while ( true ) {
-		if( !file_manager.goToNextLine( -1, true ) ) break;
+		try{
+			if( !file_manager.goToNextLine( -1, false ) ) break;
 
-		auto line = file_manager.getCurrentLine();
-		lv = createValue( line );
-		if( lt.isMatching( lv.getValues() ) )
-			break;
+			auto line = file_manager.getCurrentLine();
+			lv = createValue( line );
+			if( lt.isMatching( lv.getValues() ) ) return lv;
+		}
+		catch(EndOfFileException& e){
+			std::this_thread::sleep_for( std::chrono::milliseconds( sleep_time ) );
+			if( sleep_time > MINIMAL_SLEEP )
+				sleep_time -= SLEEP_DIFFERENCE;
+			file_manager.clear();
+		}
 	}
 
+	throw LindaNotFoundException();
 	return lv;
 }
 

@@ -141,7 +141,7 @@ void FileManager::deleteCurrentLine() {
 
 
 void FileManager::findEmptyLine() {
-    while ( !isEmpty(getNextLine(-1, true).line ) ) {}
+    while ( !isEmpty(getNextLine(-1, false).line ) ) {}
 }
 
 bool FileManager::isEmpty( const std::string& s ) const {
