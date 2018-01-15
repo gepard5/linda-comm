@@ -21,6 +21,7 @@ bool ValueParser::isTokenTypeExpected(const Token::TYPE& type)
 }
 
 void ValueParser::parseSource( Source& source, Lexer& lexer) {
+	lv = LindaValue();
 	state = STATE::BEFORE_MESSAGE;
 	token = lexer.getNextToken(source);
 	while( token.getType() != Token::END_OF_FILE ) {
@@ -34,7 +35,6 @@ void ValueParser::parseSource( Source& source, Lexer& lexer) {
 }
 
 void ValueParser::onObjectStart() {
-	lv = LindaValue();
 	state = STATE::BEFORE_VALUE;
 }
 
@@ -63,4 +63,10 @@ void ValueParser::showExpectedTokens()
 	{
 		std::cout<<Token::typeToString(t)<<std::endl;
 	}
+}
+
+LindaValue ValueParser::getLindaValue() const
+{
+	if( lv.isEmpty() ) throw LindaNotInitialized();
+	return lv;
 }

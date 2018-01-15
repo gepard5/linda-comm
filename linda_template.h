@@ -11,6 +11,9 @@ public:
 	LindaTemplate(const std::list<std::function<bool(LTPair)>>& f) :
 		value_checkers(f) {}
 
+	bool isEmpty() const
+	{ return value_checkers.empty(); }
+
 	bool isMatching(std::list<LTPair>) const;
 
 	void addValue( std::function<bool(LTPair)> f )

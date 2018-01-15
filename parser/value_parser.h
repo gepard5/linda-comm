@@ -9,8 +9,7 @@ public:
 	void parseSource( Source& source, Lexer& lexer ) override;
 	void showExpectedTokens() override;
 
-	LindaValue getLindaValue() const
-	{ return lv; }
+	LindaValue getLindaValue() const;
 
 private:
 	enum STATE {

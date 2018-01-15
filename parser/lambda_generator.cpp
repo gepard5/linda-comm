@@ -94,7 +94,7 @@ LambdaGenerator::CompareFunction LambdaGenerator::getEqualStringComparator()
 
 	return [splitted, ends_with_star](std::pair<LindaBase::Type, std::string> p) {
 		if( p.first != LindaBase::Type::STRING ) return false;
-		unsigned found = 0;
+		size_t found = 0;
 		for( const auto& s : splitted )
 		{
 			if( s.empty() ) continue;

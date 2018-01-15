@@ -10,6 +10,9 @@ public:
 	LindaValue(const std::list<LTPair>& l ) : values(l) {}
 	std::string toString() const;
 
+	bool isEmpty() const
+	{ return values.empty(); }
+
 	std::list<LTPair> getValues() const
 	{ return values; }
 

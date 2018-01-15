@@ -126,8 +126,10 @@ LindaValue LindaCommunicator::read(const LindaTemplate& lt, int timeout)
 			if( !file_manager.goToNextLine( timeout - time_passed, false ) ) break;
 
 			auto line = file_manager.getCurrentLine();
-			lv = createValue( line );
-			if( lt.isMatching( lv.getValues() ) ) return lv;
+			if( !file_manager.isEmpty( line ) ) {
+				lv = createValue( line );
+				if( lt.isMatching( lv.getValues() ) ) return lv;
+			}
 		}
 		catch(EndOfFileException& e){
 			std::this_thread::sleep_for( std::chrono::milliseconds( sleep_time ) );
@@ -153,6 +155,7 @@ LindaValue LindaCommunicator::readNoTimeout(const LindaTemplate& lt)
 			if( !file_manager.goToNextLine( -1, false ) ) break;
 
 			auto line = file_manager.getCurrentLine();
+			if( file_manager.isEmpty( line ) ) continue;
 			lv = createValue( line );
 			if( lt.isMatching( lv.getValues() ) ) return lv;
 		}

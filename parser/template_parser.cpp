@@ -29,6 +29,7 @@ bool TemplateParser::isTokenTypeExpected(const Token::TYPE& type)
 }
 
 void TemplateParser::parseSource( Source& source, Lexer& lexer) {
+	lv = LindaTemplate();
 	state = STATE::BEFORE_MESSAGE;
 	token = lexer.getNextToken(source);
 	while( token.getType() != Token::END_OF_FILE ) {
@@ -42,7 +43,6 @@ void TemplateParser::parseSource( Source& source, Lexer& lexer) {
 }
 
 void TemplateParser::onObjectStart() {
-	lv = LindaTemplate();
 	state = STATE::BEFORE_VALUE;
 }
 
@@ -127,4 +127,10 @@ void TemplateParser::addReadyComparator()
 {
 	lv.addValue( lambda_generator.getComparator() );
 	lambda_generator.clearAll();
+}
+
+LindaTemplate TemplateParser::getLindaTemplate() const
+{
+	if( lv.isEmpty() ) throw LindaNotInitialized();
+	return lv;
 }

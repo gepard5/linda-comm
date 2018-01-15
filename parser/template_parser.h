@@ -13,8 +13,7 @@ public:
 	void parseSource( Source& source, Lexer& lexer ) override;
 	void showExpectedTokens() override;
 
-	LindaTemplate getLindaTemplate() const
-	{ return lv; }
+	LindaTemplate getLindaTemplate() const;
 
 private:
 	enum STATE {

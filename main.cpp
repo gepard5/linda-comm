@@ -79,12 +79,20 @@ int main( int argc, char* argv[] ) {
 			if( choice == 0 ) {
 				return 0;
 			}
+			if( choice == 4 ) {
+				auto allLines = lc.showAll();
+				for( const auto& line : allLines )
+					std::cout<<"Line: "<<line<<std::endl;
+				continue;
+			}
 			if( choice > 4 ) {
 				std::cout<<"Wrong number. Exiting."<<std::endl;
 				return 0;
 			}
 			std::cout<<"Write in your linda"<<std::endl;
 			std::string s;
+			std::cin.clear();
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 			std::getline( std::cin, s );
 			if( choice == 1 ) {
 				auto lt = lc.read( s, timeout );
@@ -96,11 +104,6 @@ int main( int argc, char* argv[] ) {
 			else if( choice == 3 ) {
 				auto lt = lc.input( s, timeout );
 				std::cout<<lt.toString()<<std::endl;
-			}
-			else if( choice == 4 ) {
-				auto allLines = lc.showAll();
-				for( const auto& line : allLines )
-					std::cout<<"Line: "<<line<<std::endl;
 			}
 		}
 	}

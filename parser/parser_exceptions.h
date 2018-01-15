@@ -4,6 +4,13 @@
 #include <exception>
 #include <stdexcept>
 
+class LindaNotInitialized : public std::logic_error {
+	public:
+	LindaNotInitialized() : 
+		std::logic_error( "Linda not initialized") {}
+
+};
+
 class LindaNotFoundException : public std::logic_error {
 	public:
 	LindaNotFoundException() : 
